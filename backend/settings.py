@@ -25,7 +25,13 @@ SECRET_KEY = 'django-insecure-zciw597uvaujw2wq)vbsvy01v@3g-(e7nn$!vddomi_1$x0zg%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']  # Em produção, especifique seus domínios
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Vite default port
+]
+
+CORS_ALLOW_CREDENTIALS = True
 
 
 # Application definition

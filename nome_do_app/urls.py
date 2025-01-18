@@ -1,10 +1,9 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import CodigoEntradaViewSet
+from django.urls import path
+from . import views
 
-router = DefaultRouter()
-router.register(r'codigos', CodigoEntradaViewSet)
+app_name = 'nome_do_app'
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    # Add your API URL patterns here, for example:
+    # path('endpoint/', views.your_view, name='endpoint'),
 ]

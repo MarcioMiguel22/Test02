@@ -1,0 +1,107 @@
+/* static/css/admin.css */
+
+/* Ajuste da fonte e cores */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa; /* Fundo mais claro */
+    color: #333;
+}
+
+/* Cabeçalho personalizado */
+#site-name a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#site-name a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Botões no admin */
+button, .button {
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover, .button:hover {
+    background-color: #0056b3;
+}
+
+/* Tabelas no admin */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+}
+
+table th, table td {
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    text-align: left;
+}
+
+table th {
+    background-color: #f1f1f1;
+    font-weight: bold;
+}
+
+/* Links no admin */
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}
+
+/* Rodapé */
+footer {
+    background-color: #f8f9fa;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 12px;
+    color: #6c757d;
+    border-top: 1px solid #dee2e6;
+}
+/* static/css/admin.css */
+
+/* Ajustes gerais */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Links do painel */
+#site-name a {
+    color: #007bff;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#site-name a:hover {
+    color: #0056b3;
+}
+
+/* Botões */
+button, .btn {
+    border-radius: 4px;
+}
+
+/* Rodapé */
+footer {
+    font-size: 14px;
+    color: #6c757d;
+    border-top: 1px solid #dee2e6;
+}

@@ -1,6 +1,7 @@
-from django.http import HttpResponse
+from rest_framework import viewsets
+from .models import CodigoEntrada
+from .serializers import CodigoEntradaSerializer
 
-# Create your views here.
-
-def home(request):
-    return HttpResponse('Olá, mundo MEU MEU !')
+class CodigoEntradaViewSet(viewsets.ModelViewSet):
+    queryset = CodigoEntrada.objects.all()
+    serializer_class = CodigoEntradaSerializer

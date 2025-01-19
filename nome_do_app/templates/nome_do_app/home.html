@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Códigos de Entrada</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Códigos de Entrada</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Localização</th>
+                <th>Instalação</th>
+                <th>Códigos da Porta</th>
+                <th>Código Caves</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for codigo in codigos %}
+            <tr>
+                <td>{{ codigo.id }}</td>
+                <td>{{ codigo.localizacao }}</td>
+                <td>{{ codigo.instalacao }}</td>
+                <td>{{ codigo.codigos_da_porta }}</td>
+                <td>{{ codigo.codigo_caves }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

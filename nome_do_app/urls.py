@@ -8,5 +8,6 @@ router = DefaultRouter()
 router.register(r'codigos', views.CodigoEntradaViewSet, basename='codigoentrada')
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', views.home, name='home'),  # Add the home view as root URL
+    path('api/', include(router.urls)),  # Keep the API URLs under /api/
 ]

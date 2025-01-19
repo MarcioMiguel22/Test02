@@ -1,10 +1,11 @@
 from django.http import HttpResponse
 from django.shortcuts import render
+from .models import CodigoEntrada
 
 # Create your views here.
 
 def home(request):
-    return render(request, 'home.html')
+    return render(request, 'nome_do_app/home.html')
 
 
 

@@ -1,10 +1,10 @@
 from django.db import models
 
 class CodigoEntrada(models.Model):
-    localizacao = models.CharField(max_length=255)
-    instalacao = models.CharField(max_length=255)
-    codigos_da_porta = models.TextField()
-    codigo_caves = models.CharField(max_length=255)
+    localizacao = models.CharField(max_length=255, blank=False)
+    instalacao = models.CharField(max_length=255, blank=False)
+    codigos_da_porta = models.TextField(default='', blank=True)
+    codigo_caves = models.CharField(max_length=255, blank=False)
 
     class Meta:
         ordering = ['localizacao']

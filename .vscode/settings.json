@@ -1,4 +1,14 @@
 {
+    // Caminho para o interpretador Python do ambiente virtual
     "python.defaultInterpreterPath": "./meu_venv/bin/python",
-    "python.terminal.activateEnvironment": true
+
+    // Ativar automaticamente o ambiente virtual no terminal integrado
+    "python.terminal.activateEnvironment": true,
+
+    // Configurações para análise de código
+    "python.analysis.extraPaths": [
+        "./"  // Adiciona o diretório raiz como caminho adicional
+    ],
+    "python.analysis.autoSearchPaths": true, // Detecta automaticamente caminhos extras
+    "python.analysis.useLibraryCodeForTypes": true // Melhora análise para bibliotecas externas
 }

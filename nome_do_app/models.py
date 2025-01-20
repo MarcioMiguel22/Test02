@@ -1,13 +1,3 @@
-"""
-Arquivo: models.py
-Descrição:
-    Modelo de dados para 'CodigoEntrada'.
-    - localizacao: campo textual (pode não ser único).
-    - instalacao: campo textual, mas com unique=True.
-    - codigos_da_porta: texto (separado por vírgula).
-    - codigo_caves: campo textual adicional.
-"""
-
 from django.db import models
 
 
@@ -20,9 +10,8 @@ class CodigoEntrada(models.Model):
         help_text="Descrição do local (pode haver várias instalações no mesmo local)."
     )
     instalacao = models.CharField(
-        max_length=255,
-        unique=True,  # Impede duplicados neste campo
-        help_text="Nome único ou identificador da instalação (ex: 'Sala 101')."
+        max_length=255,  # Removido unique=True
+        help_text="Nome ou identificador da instalação (ex: 'Sala 101')."
     )
     codigos_da_porta = models.TextField(
         help_text="Códigos de acesso à porta, separados por vírgula."

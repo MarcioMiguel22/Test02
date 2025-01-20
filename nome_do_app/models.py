@@ -55,4 +55,4 @@ class CodigoEntrada(models.Model):
         """
         ordering = ['localizacao']  # Ordena a listagem pelo campo 'localizacao'
         # Removemos unique_together para permitir várias localizações repetidas 
-        # e manter apenas a restrição de unicidade em 'instalacao'.
+        # e manter apenas a restrição de unicidade em  'instalacao'.

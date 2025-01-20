@@ -13,76 +13,93 @@ def home(request):
     return render(request, 'home.html')
 
 
-# Abaixo, temos importações específicas do Django Rest Framework (DRF) 
+# Abaixo, temos importações específicas do Django Rest Framework (DRF)
 # para criação de APIs.
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
+# Importa o IntegrityError, útil caso um objeto viole constraints como unique=True
+from django.db import IntegrityError
+
 # Importa o modelo CodigoEntrada (que deve ser definido no arquivo models.py).
 from .models import CodigoEntrada
 
-# Importa o serializer CodigoEntradaSerializer (que também deve estar 
+# Importa o serializer CodigoEntradaSerializer (que também deve estar
 # definido no arquivo serializers.py).
 from .serializers import CodigoEntradaSerializer
 
 
-# Esta classe define um conjunto de views (ViewSet) para o modelo CodigoEntrada.
-# Um ModelViewSet já provê as operações básicas de CRUD: listar, criar, 
-# recuperar, atualizar e deletar registros.
 class CodigoEntradaViewSet(viewsets.ModelViewSet):
-    # Define o conjunto de dados (queryset) que será manipulado pelas operações.
-    queryset = CodigoEntrada.objects.all()
+    """
+    ViewSet para o modelo CodigoEntrada. Provê operações de CRUD.
+    """
 
-    # Define qual serializer será utilizado para converter os objetos do 
-    # banco de dados em JSON e vice-versa.
+    queryset = CodigoEntrada.objects.all()
     serializer_class = CodigoEntradaSerializer
 
-    # Sobrescrevemos o método create para adicionar a possibilidade de 
-    # criação em lote (bulk create).
     def create(self, request, *args, **kwargs):
-        # Verifica se os dados enviados são uma lista, o que indica 
-        # que o usuário deseja criar vários registros de uma vez.
-        if isinstance(request.data, list):
-            # Cria uma instância do serializer com a opção many=True, 
-            # pois é uma lista de objetos.
-            serializer = self.get_serializer(data=request.data, many=True)
+        """
+        Lida com criação de registros.
+        - Se receber uma lista, cria cada item individualmente (partial success).
+        - Se receber um objeto único, faz o comportamento padrão.
+        """
+        data = request.data
 
-            # Valida os dados; se estiverem inválidos, gera um erro.
-            serializer.is_valid(raise_exception=True)
+        # Se for lista, faremos partial success
+        if isinstance(data, list):
+            created_items = []
+            errors = []
 
-            # Salva efetivamente os registros no banco de dados.
-            self.perform_create(serializer)
+            for item in data:
+                # Cria um serializer para cada item individual
+                serializer = self.get_serializer(data=item)
 
-            # Obtém os headers de sucesso (geralmente usado em conformidade 
-            # com HTTP para inserir a localização do novo recurso).
-            headers = self.get_success_headers(serializer.data)
+                # Verifica se o serializer é válido (campos obrigatórios, tipos, etc.)
+                if serializer.is_valid():
+                    try:
+                        # Tenta salvar no banco
+                        self.perform_create(serializer)
+                        # Se criou com sucesso, adiciona à lista de criados
+                        created_items.append(serializer.data)
+                    except IntegrityError as e:
+                        # Se houver um erro de integridade (ex.: unique=True duplicado),
+                        # armazenamos para reportar ao cliente
+                        errors.append({
+                            'item': item,
+                            'error': f"IntegrityError: {str(e)}"
+                        })
+                else:
+                    # Se dados inválidos (falta campo, formato errado, etc.),
+                    # guardamos as mensagens de erro
+                    errors.append({
+                        'item': item,
+                        'error': serializer.errors
+                    })
 
-            # Retorna a resposta com status 201 (Created) e os dados criados.
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            # Retornamos 'partial success': alguns itens podem ter sido criados,
+            # outros não. Aqui usamos 207 (Multi-Status), mas você pode usar 200.
+            return Response(
+                {
+                    'created': created_items,
+                    'errors': errors,
+                },
+                status=status.HTTP_207_MULTI_STATUS
+            )
 
-        # Caso não seja uma lista, chamamos o método create padrão 
-        # da classe pai (ModelViewSet) para criação de um registro único.
+        # Se for um objeto único, chamar o método padrão (tudo ou nada).
         return super().create(request, *args, **kwargs)
 
-    # Aqui usamos o decorator @action para criar uma ação customizada na rota,
-    # neste caso chamada 'sync'. Ela estará disponível no endpoint:
-    # POST /codigoentrada/sync/ (sem precisar de um ID, pois detail=False).
     @action(detail=False, methods=['post'])
     def sync(self, request):
-        # Primeiro, apagamos todos os registros existentes de CodigoEntrada
-        # para depois inserir dados "sincronizados", conforme dados enviados.
+        """
+        Limpa todos os registros e insere novos. 
+        Neste exemplo, mantém o comportamento 'tudo ou nada'.
+        Se quiser partial success aqui também, basta usar lógica semelhante a 'create'.
+        """
         CodigoEntrada.objects.all().delete()
 
-        # Novamente criamos instâncias do serializer em modo many=True, 
-        # pois se espera receber vários registros.
         serializer = self.get_serializer(data=request.data, many=True)
-
-        # Valida todos os registros recebidos.
         serializer.is_valid(raise_exception=True)
-
-        # Salva os novos registros no banco de dados.
         self.perform_create(serializer)
-
-        # Retorna a resposta com status 201 (Created) e os dados criados.
         return Response(serializer.data, status=status.HTTP_201_CREATED)

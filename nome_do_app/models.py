@@ -1,35 +1,58 @@
-# O módulo django.db.models é onde estão definidas as classes base para criar
-# modelos (tabelas) no Django. Aqui importamos esse módulo para poder definir
-# nossas tabelas.
+"""
+Arquivo: models.py
+Autor: (Seu nome ou equipe)
+Descrição:
+    Este arquivo define o modelo de dados para 'CodigoEntrada'.
+    - localizacao: nome/descrição do local (pode se repetir).
+    - instalacao: identificador único da instalação (unique=True).
+    - codigos_da_porta: possíveis códigos de acesso (texto, separados por vírgula).
+    - codigo_caves: campo adicional para código 'caves'.
+
+Notas:
+    - 'unique=True' em 'instalacao' impede registros duplicados de instalação.
+    - Se houver regras de negócio específicas (ex.: validações adicionais), 
+      considere sobrescrever métodos como 'clean()' ou usar signals.
+"""
+
+# O módulo django.db.models contém as classes base para criar modelos (tabelas) no Django.
 from django.db import models
 
-# A classe CodigoEntrada representa uma tabela no banco de dados, onde cada
-# instância dessa classe será um registro na tabela.
+
 class CodigoEntrada(models.Model):
-    # localizacao: armazenará informações sobre a localização (ex: nome de um prédio).
-    # É um CharField, ou seja, um campo do tipo string com tamanho máximo de 255 caracteres.
-    localizacao = models.CharField(max_length=255)
+    """
+    Representa uma entrada de código (porta/caves) para uma instalação específica.
+    """
 
-    # instalacao: armazenará informações sobre a instalação em que o código
-    # está relacionado (ex: sala, andar, etc.). Também é um CharField com
-    # tamanho máximo de 255 caracteres.
-    instalacao = models.CharField(max_length=255)
+    localizacao = models.CharField(
+        max_length=255,
+        help_text="Descrição do local (pode haver várias instalações no mesmo local)."
+    )
 
-    # codigos_da_porta: campo para armazenar códigos da porta. Usamos TextField
-    # pois pode conter múltiplos códigos separados por vírgula, por exemplo.
-    # É um texto mais longo do que um CharField simples.
-    codigos_da_porta = models.TextField()  # Armazena como string separada por vírgulas
+    instalacao = models.CharField(
+        max_length=255,
+        unique=True,  # Garante que não haja duas instalações com mesmo valor.
+        help_text="Nome único ou identificador da instalação (ex: Sala 101)."
+    )
 
-    # codigo_caves: armazena algum tipo de código relacionado a "caves"
-    # (termos específicos do projeto). É um CharField com limite de 255 caracteres.
-    codigo_caves = models.CharField(max_length=255)
+    codigos_da_porta = models.TextField(
+        help_text="Códigos de acesso à porta, separados por vírgula."
+    )
 
-    # O método __str__ define como o objeto será representado como string
-    # (útil para exibição no Django admin, por exemplo).
-    def __str__(self):
+    codigo_caves = models.CharField(
+        max_length=255,
+        help_text="Código adicional (por exemplo, 'caves')."
+    )
+
+    def __str__(self) -> str:
+        """
+        Retorna uma representação amigável, útil para o Django admin e outros locais.
+        """
         return f"{self.localizacao} - {self.instalacao}"
 
-    # A classe Meta permite definir configurações adicionais do modelo.
-    # Aqui, estamos definindo a ordenação padrão pela coluna 'localizacao'.
     class Meta:
-        ordering = ['localizacao']
+        """
+        Configurações adicionais do modelo.
+        """
+        ordering = ['localizacao']  # Ordena a listagem pelo campo 'localizacao'
+        # Removemos unique_together para permitir várias localizações repetidas 
+        # e manter apenas a restrição de unicidade em 'instalacao'.

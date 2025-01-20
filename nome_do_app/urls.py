@@ -30,5 +30,11 @@ router.register(r'codigos', views.CodigoEntradaViewSet, basename='codigoentrada'
 # A lista de padrões de URL do app. Aqui, definimos que quando acessarmos
 # o caminho 'api/', incluiremos todas as rotas geradas pelo 'router'.
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', views.home, name='home'),  # Add the home view as root URL
+    path('api/', include(router.urls)),  # Keep the API URLs under /api/
+    path('codigos/', views.CodigoEntradaViewSet.as_view({'get': 'list', 'post': 'create'})),
+    path('codigos/<int:pk>/', views.CodigoEntradaViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
 ]
+
+
+

@@ -17,11 +17,15 @@ Notas:
 # O módulo django.db.models contém as classes base para criar modelos (tabelas) no Django.
 from django.db import models
 
-
 class CodigoEntrada(models.Model):
-    """
-    Representa uma entrada de código (porta/caves) para uma instalação específica.
-    """
+    localizacao = models.CharField(max_length=255, blank=False)
+    instalacao = models.CharField(max_length=255, blank=False)
+    codigos_da_porta = models.TextField(default='', blank=True)
+    codigo_caves = models.CharField(max_length=255, blank=False)
+
+    class Meta:
+        ordering = ['localizacao']
+        unique_together = ('localizacao', 'instalacao')  # Add constraint back
 
     localizacao = models.CharField(
         max_length=255,
@@ -48,6 +52,7 @@ class CodigoEntrada(models.Model):
         Retorna uma representação amigável, útil para o Django admin e outros locais.
         """
         return f"{self.localizacao} - {self.instalacao}"
+
 
     class Meta:
         """

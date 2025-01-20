@@ -1,6 +1,5 @@
 from django.http import HttpResponse
 from django.shortcuts import render
-
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.db import IntegrityError
@@ -31,9 +30,10 @@ class CodigoEntradaViewSet(viewsets.ModelViewSet):
           - Se receber uma lista, cria cada item individualmente (partial success).
           - Se receber um objeto único, faz o comportamento normal.
         """
+
         data = request.data
 
-        # Caso recebamos uma lista de itens (bulk)
+        # Caso recebamos uma lista de itens
         if isinstance(data, list):
             created_items = []
             errors = []
@@ -51,38 +51,35 @@ class CodigoEntradaViewSet(viewsets.ModelViewSet):
                             'error': f"IntegrityError: {str(e)}"
                         })
                 else:
-                    # Erros de validação
                     errors.append({
                         'item': item,
                         'error': serializer.errors
                     })
 
-            # Retorna partial success (created + errors)
             return Response(
                 {
                     'created': created_items,
                     'errors': errors,
                 },
-                status=status.HTTP_207_MULTI_STATUS  # 207 -> partial success
+                status=status.HTTP_207_MULTI_STATUS  # 207 indica partial success
             )
 
-        # Se for objeto único, usa a lógica padrão do DRF (criação "tudo ou nada")
+        # Se for objeto único, segue comportamento normal do DRF
+        return super().create(request, *args, **kwargs)
+
+        # Se for um objeto único, chamar o método padrão (tudo ou nada).
         return super().create(request, *args, **kwargs)
 
     @action(detail=False, methods=['post'])
     def sync(self, request):
         """
-        Exemplo de ação customizada:
-        - Deleta todos os registros
-        - Cria novos registros de acordo com o POST recebido (lista).
-
-        Aqui mantemos comportamento 'tudo ou nada':
-        Se algum item falhar, dispara exceção e não cria nada.
+        Limpa todos os registros e insere novos. 
+        Neste exemplo, mantém o comportamento 'tudo ou nada'.
+        Se quiser partial success aqui também, basta usar lógica semelhante a 'create'.
         """
         CodigoEntrada.objects.all().delete()
 
         serializer = self.get_serializer(data=request.data, many=True)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-
         return Response(serializer.data, status=status.HTTP_201_CREATED)

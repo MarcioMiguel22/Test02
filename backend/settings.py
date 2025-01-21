@@ -23,13 +23,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-zciw597uvaujw2wq)vbsvy01v@3g-(e7nn$!vddomi_1$x0zg%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']  # Em produção, especifique seus domínios
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vite default port
+    "http://localhost:5173",  # Vite local
+    "https://elevahub.netlify.app",  # Produção
 ]
+CORS_ALLOW_ALL_ORIGINS = True  # Remova ou deixe explícito
+
 
 CORS_ALLOW_CREDENTIALS = True
 

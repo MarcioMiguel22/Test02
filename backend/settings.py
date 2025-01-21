@@ -31,8 +31,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Vite local
     "https://elevahub.netlify.app",  # Produção
 ]
-CORS_ALLOW_ALL_ORIGINS = True  # Remova ou deixe explícito
-
 
 CORS_ALLOW_CREDENTIALS = True
 

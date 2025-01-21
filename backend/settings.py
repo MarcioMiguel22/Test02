@@ -24,8 +24,17 @@ SECRET_KEY = 'django-insecure-zciw597uvaujw2wq)vbsvy01v@3g-(e7nn$!vddomi_1$x0zg%
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",  # Vite local
+    "https://elevahub.netlify.app", 
+    "https://test02-production.up.railway.app/",
+]  #
 
-ALLOWED_HOSTS = ['*']  # Em produção, especifique seus domínios
+ALLOWED_HOSTS = [
+    "http://localhost:5173",  # Vite local
+    "https://elevahub.netlify.app", 
+    "https://test02-production.up.railway.app/",
+]  # Em produção, especifique seus domínios
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Vite local
@@ -53,6 +62,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -60,7 +70,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'backend.urls'

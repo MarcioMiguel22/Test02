@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.response import Response
 from django.db import IntegrityError
 from rest_framework.decorators import action
@@ -67,9 +67,6 @@ class CodigoEntradaViewSet(viewsets.ModelViewSet):
         # Se for objeto único, segue comportamento normal do DRF
         return super().create(request, *args, **kwargs)
 
-        # Se for um objeto único, chamar o método padrão (tudo ou nada).
-        return super().create(request, *args, **kwargs)
-
     @action(detail=False, methods=['post'])
     def sync(self, request):
         """
@@ -80,6 +77,25 @@ class CodigoEntradaViewSet(viewsets.ModelViewSet):
         CodigoEntrada.objects.all().delete()
 
         serializer = self.get_serializer(data=request.data, many=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class CodigoListCreateAPIView(generics.ListCreateAPIView):
+    queryset = CodigoEntrada.objects.all()
+    serializer_class = CodigoEntradaSerializer
+
+    def get(self, request, *args, **kwargs):
+        """
+        Handle GET requests to list all CodigoEntrada instances.
+        """
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Handle POST requests to create a new CodigoEntrada instance.
+        """
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

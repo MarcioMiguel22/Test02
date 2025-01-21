@@ -16,8 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from nome_do_app.views import home, CodigoListCreateAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('nome_do_app.urls')),
+    path('api/', include('nome_do_app.urls')),
+    path('', home, name='home'),  # Add this line to include the home view
+    path('api/codigos/', CodigoListCreateAPIView.as_view(), name='codigo-list-create'),  # Add this line to include the CodigoListCreateAPIView
 ]

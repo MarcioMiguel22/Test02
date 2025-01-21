@@ -23,7 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-zciw597uvaujw2wq)vbsvy01v@3g-(e7nn$!vddomi_1$x0zg%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
+
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",  # Vite local
     "https://elevahub.netlify.app", 
@@ -34,12 +35,13 @@ ALLOWED_HOSTS = [
     "http://localhost:5173",  # Vite local
     "https://elevahub.netlify.app", 
     "https://test02-production.up.railway.app/",
+    '127.0.0.1',  # Add this line
 ]  # Em produção, especifique seus domínios
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Vite local
     "https://elevahub.netlify.app", 
-    "https://test02-production.up.railway.app/",
+    "https://test02-production.up.railway.app",  # Removed the trailing slash
 ]
 CORS_ALLOW_ALL_ORIGINS = True  # Remova ou deixe explícito
 
@@ -149,8 +151,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-CORS_ALLOW_ALL_ORIGINS = True
 
 
 REST_FRAMEWORK = {

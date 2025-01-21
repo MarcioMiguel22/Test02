@@ -34,8 +34,9 @@ CSRF_TRUSTED_ORIGINS = [
 ALLOWED_HOSTS = [
     "http://localhost:5173",  # Vite local
     "https://elevahub.netlify.app", 
-    "https://test02-production.up.railway.app/",
-    '127.0.0.1',  # Add this line
+    "https://test02-production.up.railway.app",  # Removed the trailing slash
+    '127.0.0.1',
+    'test02-production.up.railway.app',  # Ensure this line is present
 ]  # Em produção, especifique seus domínios
 
 CORS_ALLOWED_ORIGINS = [

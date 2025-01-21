@@ -31,4 +31,5 @@ router.register(r'codigos', views.CodigoEntradaViewSet, basename='codigoentrada'
 # o caminho 'api/', incluiremos todas as rotas geradas pelo 'router'.
 urlpatterns = [
     path('api/', include(router.urls)),
+    path('some-endpoint/', views.some_view, name='some_view'),  # Exemplo de endpoint
 ]

@@ -30,8 +30,9 @@ ALLOWED_HOSTS = ['*']  # Em produção, especifique seus domínios
 CORS_ALLOWED_ORIGINS = [
     "https://elevahub.netlify.app",
 ]
-CORS_ALLOW_ALL_ORIGINS = True  # Remova ou deixe explícito
 
+# Remova a linha abaixo se você já especificou os domínios permitidos
+# CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -137,9 +138,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-CORS_ALLOW_ALL_ORIGINS = True
-
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [

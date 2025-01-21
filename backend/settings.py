@@ -29,7 +29,8 @@ ALLOWED_HOSTS = ['*']  # Em produção, especifique seus domínios
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Vite local
-    "https://elevahub.netlify.app",  # Produção
+    "https://elevahub.netlify.app", 
+    "https://test02-production.up.railway.app/",
 ]
 CORS_ALLOW_ALL_ORIGINS = True  # Remova ou deixe explícito
 

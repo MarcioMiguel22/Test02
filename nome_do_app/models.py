@@ -1,3 +1,5 @@
+#MODELS.PY
+
 """
 Arquivo: models.py
 Descrição:
@@ -16,7 +18,7 @@ class CodigoEntrada(models.Model):
     Representa uma entrada de código (porta/caves) para uma instalação específica.
     """
     localizacao = models.CharField(max_length=255)
-    instalacao = models.CharField(max_length=255)
+    instalacao = models.CharField(max_length=255, unique=True)
     codigos_da_porta = models.TextField()
     codigo_caves = models.CharField(max_length=255)
     local_de_chaves = models.CharField(max_length=255)

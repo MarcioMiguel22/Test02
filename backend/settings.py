@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,10 +21,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-zciw597uvaujw2wq)vbsvy01v@3g-(e7nn$!vddomi_1$x0zg%'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",  # Vite local
@@ -32,15 +33,21 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.elevachecks.com",  # Add this line
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "https://elevahub.netlify.app",
+    "https://test02-production.up.railway.app",
+    "https://www.elevachecks.com",
+]
+
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'http://localhost:5173',
-    'https://elevahub.netlify.app',
-    'https://test02-production.up.railway.app',
-    'https://www.elevachecks.com',
+    'elevahub.netlify.app',
     'test02-production.up.railway.app',
-]  # Em produção, especifique seus domínios
+    'www.elevachecks.com',
+]
+
 
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
@@ -75,7 +82,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # Ensure this line is present
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -84,6 +91,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -109,16 +117,21 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'UoStDrLimFuuumWSdUwSdyuDGlUytYBP',
-        'HOST': 'junction.proxy.rlwy.net',
-        'PORT': '17183',
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+        'HOST': os.getenv('DATABASE_HOST'),
+        'PORT': os.getenv('DATABASE_PORT'),
     }
 }
+
+
+
+
 
 
 # Password validation

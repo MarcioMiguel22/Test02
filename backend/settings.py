@@ -42,11 +42,20 @@ ALLOWED_HOSTS = [
     'test02-production.up.railway.app',
 ]  # Em produção, especifique seus domínios
 
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vite local
-    "https://elevahub.netlify.app", 
+    "http://localhost:5173",
+    "https://elevahub.netlify.app",
     "https://test02-production.up.railway.app",
     "https://www.elevachecks.com",
+]
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -166,3 +175,24 @@ REST_FRAMEWORK = {
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}

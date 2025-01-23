@@ -9,9 +9,6 @@ app_name = 'nome_do_app'
 # Criamos uma instância de DefaultRouter para registrar nosso ViewSet.
 router = DefaultRouter()
 
-# Registramos o ViewSet 'CodigoEntradaViewSet' na rota 'codigos'.
-router.register(r'codigos', views.CodigoEntradaViewSet, basename='codigoentrada')
-
 # A lista de padrões de URL do app.
 urlpatterns = [
     # Inclui todas as rotas geradas automaticamente pelo router
@@ -32,3 +29,6 @@ urlpatterns = [
     # Rota específica para HomeView
     path('', HomeView.as_view(), name='home'),
 ]
+
+# Registramos o ViewSet 'CodigoEntradaViewSet' na rota 'api/codigos'.
+router.register(r'api/codigos', views.CodigoEntradaViewSet, basename='codigoentrada')

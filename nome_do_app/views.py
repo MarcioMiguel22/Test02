@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from django.http import HttpResponse
 from django.shortcuts import render
 from rest_framework import viewsets, status, generics
@@ -29,6 +32,23 @@ class CodigoEntradaViewSet(viewsets.ModelViewSet):
     """
     queryset = CodigoEntrada.objects.all()
     serializer_class = CodigoEntradaSerializer
+
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error in CodigoEntradaViewSet.list: {str(e)}")
+            return Response(
+                {"error": "Internal server error"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def create(self, request, *args, **kwargs):
         """

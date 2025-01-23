@@ -20,11 +20,6 @@ def home(request):
     return render(request, 'home.html')
 
 
-class HomeView(APIView):
-    def get(self, request):
-        return Response({"message": "Welcome to the Home Page"}, status=status.HTTP_200_OK)
-
-
 class CodigoEntradaViewSet(viewsets.ModelViewSet):
     """
     ViewSet para o modelo CodigoEntrada. Provê operações de CRUD completas:
@@ -163,14 +158,18 @@ class CodigoListCreateAPIView(generics.ListCreateAPIView):
         self.perform_update(serializer)
         return Response(serializer.data)
 
-class LocalDeChavesAPIView(generics.ListAPIView):
+class LocalDeChavesAPIView(generics.ListCreateAPIView):
     queryset = CodigoEntrada.objects.all()
     serializer_class = CodigoEntradaSerializer
 
-class AdministracaoAPIView(generics.ListAPIView):
+class AdministracaoAPIView(generics.ListCreateAPIView):
     queryset = CodigoEntrada.objects.all()
     serializer_class = CodigoEntradaSerializer
 
 class CodigoEntradaDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CodigoEntrada.objects.all()
+    serializer_class = CodigoEntradaSerializer
+
+class HomeView(generics.ListAPIView):
     queryset = CodigoEntrada.objects.all()
     serializer_class = CodigoEntradaSerializer

@@ -16,7 +16,7 @@ class CodigoEntrada(models.Model):
     Representa uma entrada de código (porta/caves) para uma instalação específica.
     """
     localizacao = models.CharField(max_length=255)
-    instalacao = models.CharField(max_length=255, unique=True)
+    instalacao = models.CharField(max_length=255)
     codigos_da_porta = models.TextField()
     codigo_caves = models.CharField(max_length=255)
     local_de_chaves = models.CharField(max_length=255)
@@ -24,7 +24,7 @@ class CodigoEntrada(models.Model):
     administracao = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.localizacao} - {self.instalacao}"
+        return self.localizacao
 
     class Meta:
         ordering = ['localizacao']  # Ordena listagens pelo campo 'localizacao'

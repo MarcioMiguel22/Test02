@@ -95,7 +95,34 @@ class CodigoListCreateAPIView(generics.ListCreateAPIView):
         """
         Handle GET requests to list all CodigoEntrada instances.
         """
-        return self.list(request, *args, **kwargs)
+        queryset = self.get_queryset()
+
+        # Filter by query parameters if provided
+        localizacao = request.GET.get('localizacao')
+        instalacao = request.GET.get('instalacao')
+        codigos_da_porta = request.GET.get('codigos_da_porta')
+        codigo_caves = request.GET.get('codigo_caves')
+        local_de_chaves = request.GET.get('local_de_chaves')
+        tipo_de_contrato = request.GET.get('tipo_de_contrato')
+        administracao = request.GET.get('administracao')
+
+        if localizacao:
+            queryset = queryset.filter(localizacao=localizacao)
+        if instalacao:
+            queryset = queryset.filter(instalacao=instalacao)
+        if codigos_da_porta:
+            queryset = queryset.filter(codigos_da_porta=codigos_da_porta)
+        if codigo_caves:
+            queryset = queryset.filter(codigo_caves=codigo_caves)
+        if local_de_chaves:
+            queryset = queryset.filter(local_de_chaves=local_de_chaves)
+        if tipo_de_contrato:
+            queryset = queryset.filter(tipo_de_contrato=tipo_de_contrato)
+        if administracao:
+            queryset = queryset.filter(administracao=administracao)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
         """

@@ -20,6 +20,9 @@ urlpatterns = [
     # Rota específica para CodigoListCreateAPIView
     path('api/codigos/custom/', CodigoListCreateAPIView.as_view(), name='codigo-list-create'),
 
+    # Rota específica para atualizar uma instância de CodigoEntrada
+    path('api/codigos/<int:pk>/', views.CodigoEntradaDetailAPIView.as_view(), name='codigo-detail'),
+
     # Rota específica para LocalDeChavesAPIView
     path('api/local_de_chaves/', LocalDeChavesAPIView.as_view(), name='local-de-chaves'),
     

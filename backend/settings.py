@@ -30,7 +30,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://elevahub.netlify.app", 
     "https://test02-production.up.railway.app/",
     "https://www.elevachecks.com",  # Add this line
-]  #
+]
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -50,9 +50,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_ALL_ORIGINS = True  # Remova ou deixe explícito
 
-
 CORS_ALLOW_CREDENTIALS = True
-
 
 # Application definition
 
@@ -77,7 +75,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -167,4 +164,6 @@ REST_FRAMEWORK = {
 }
 
 
-STATICFILES_DIRS = [    BASE_DIR / 'static',]
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]

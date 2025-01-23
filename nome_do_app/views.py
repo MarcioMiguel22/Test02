@@ -150,3 +150,7 @@ class LocalDeChavesAPIView(generics.ListAPIView):
 class AdministracaoAPIView(generics.ListAPIView):
     queryset = CodigoEntrada.objects.all()
     serializer_class = CodigoEntradaSerializer
+
+class CodigoEntradaDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CodigoEntrada.objects.all()
+    serializer_class = CodigoEntradaSerializer

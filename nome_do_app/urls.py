@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
-from .views import CodigoListCreateAPIView, LocalDeChavesAPIView, AdministracaoAPIView
+from .views import CodigoListCreateAPIView, LocalDeChavesAPIView, AdministracaoAPIView, HomeView
 
 # Definimos o nome do app para referenciação reversa de URLs.
 app_name = 'nome_do_app'
@@ -25,4 +25,7 @@ urlpatterns = [
     
     # Rota específica para AdministracaoAPIView
     path('api/administracao/', AdministracaoAPIView.as_view(), name='administracao'),
+
+    # Rota específica para HomeView
+    path('', HomeView.as_view(), name='home'),
 ]

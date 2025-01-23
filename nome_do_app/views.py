@@ -109,3 +109,11 @@ class CodigoListCreateAPIView(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
+
+class LocalDeChavesAPIView(generics.ListAPIView):
+    queryset = CodigoEntrada.objects.all()
+    serializer_class = CodigoEntradaSerializer
+
+class AdministracaoAPIView(generics.ListAPIView):
+    queryset = CodigoEntrada.objects.all()
+    serializer_class = CodigoEntradaSerializer

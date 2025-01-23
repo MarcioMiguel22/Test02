@@ -4,6 +4,7 @@ from rest_framework import viewsets, status, generics
 from rest_framework.response import Response
 from django.db import IntegrityError
 from rest_framework.decorators import action
+from rest_framework.views import APIView
 
 from .models import CodigoEntrada
 from .serializers import CodigoEntradaSerializer
@@ -14,6 +15,11 @@ def home(request):
     Renderiza a página inicial (home.html).
     """
     return render(request, 'home.html')
+
+
+class HomeView(APIView):
+    def get(self, request):
+        return Response({"message": "Welcome to the Home Page"}, status=status.HTTP_200_OK)
 
 
 class CodigoEntradaViewSet(viewsets.ModelViewSet):

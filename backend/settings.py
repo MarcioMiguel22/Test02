@@ -45,10 +45,9 @@ ALLOWED_HOSTS = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Vite local
     "https://elevahub.netlify.app", 
-    "https://test02-production.up.railway.app",  # Removed the trailing slash
-    "https://www.elevachecks.com",  # Add this line
+    "https://test02-production.up.railway.app",
+    "https://www.elevachecks.com",
 ]
-CORS_ALLOW_ALL_ORIGINS = True  # Remova ou deixe explícito
 
 CORS_ALLOW_CREDENTIALS = True
 

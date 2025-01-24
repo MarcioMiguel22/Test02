@@ -31,9 +31,25 @@ class CodigoEntrada(models.Model):
         max_length=255,
         help_text="Código adicional (por exemplo, 'caves')."
     )
-    local_da_chave = models.CharField(max_length=255, blank=True)  # New field
-    administracao = models.CharField(max_length=255, blank=True)   # New field
-    tipo_de_contrato = models.CharField(max_length=255, blank=True)  # New field
+    local_da_chave = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        help_text="Localização da chave"
+    )
+    administracao = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        help_text="Informação sobre administração"
+    )
+    tipo_de_contrato = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        help_text="Tipo do contrato"
+    )
+
     def __str__(self) -> str:
         return f"{self.localizacao} - {self.instalacao}"
 

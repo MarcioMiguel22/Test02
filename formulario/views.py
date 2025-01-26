@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 def salvar_respostas(request):
     """
-    Endpoint para salvar respostas enviadas via POST.
+    Endpoint para salvar ou atualizar respostas enviadas via POST.
     """
     if request.method == 'POST':
         try:
@@ -29,18 +29,20 @@ def salvar_respostas(request):
                 logger.warning("Dados obrigatórios ausentes.")
                 return JsonResponse({'status': 'error', 'message': 'Dados obrigatórios ausentes'}, status=400)
 
-            # Salvar cada resposta no banco de dados
+            # Salvar ou atualizar cada resposta no banco de dados
             for pergunta_id, resposta in respostas.items():
                 comentario = comentarios.get(pergunta_id, "")
-                Resposta.objects.create(
+                Resposta.objects.update_or_create(
                     numero_instalacao=numero_instalacao,
                     pergunta_id=pergunta_id,
-                    resposta=resposta,
-                    comentario=comentario,
-                    tecnico=tecnico
+                    defaults={
+                        "resposta": resposta,
+                        "comentario": comentario,
+                        "tecnico": tecnico
+                    }
                 )
-            logger.info(f"Respostas salvas para a instalação {numero_instalacao}.")
-            return JsonResponse({'status': 'success', 'message': 'Respostas salvas com sucesso!'})
+            logger.info(f"Respostas salvas ou atualizadas para a instalação {numero_instalacao}.")
+            return JsonResponse({'status': 'success', 'message': 'Respostas salvas ou atualizadas com sucesso!'})
 
         except json.JSONDecodeError:
             logger.error("Erro no formato JSON recebido.")

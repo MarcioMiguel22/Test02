@@ -120,3 +120,48 @@ def obter_todas_respostas(request):
 
     logger.warning("Método HTTP não permitido.")
     return HttpResponseNotAllowed(['GET'])
+
+
+@csrf_exempt
+def criar_instalacao(request):
+    """
+    Endpoint para criar uma nova instalação.
+    """
+    if request.method == 'POST':
+        try:
+            logger.info("Requisição para criar uma nova instalação recebida.")
+            data = json.loads(request.body)
+
+            # Obter número da instalação
+            numero_instalacao = data.get('numeroInstalacao')
+
+            if not numero_instalacao:
+                logger.warning("Número da instalação ausente.")
+                return JsonResponse({'status': 'error', 'message': 'Número da instalação é obrigatório.'}, status=400)
+
+            # Verificar se já existe uma instalação com o mesmo número
+            if Resposta.objects.filter(numero_instalacao=numero_instalacao).exists():
+                logger.warning(f"Instalação {numero_instalacao} já existe.")
+                return JsonResponse({'status': 'error', 'message': 'Instalação já existe.'}, status=409)
+
+            # Criar um registro inicial (pode ser vazio) para a instalação
+            Resposta.objects.create(
+                numero_instalacao=numero_instalacao,
+                pergunta_id=0,  # Pode ser ajustado dependendo da lógica
+                resposta="",
+                comentario="",
+                tecnico="Técnico padrão"
+            )
+
+            logger.info(f"Nova instalação {numero_instalacao} criada com sucesso.")
+            return JsonResponse({'status': 'success', 'message': 'Nova instalação criada com sucesso.'}, status=201)
+
+        except json.JSONDecodeError:
+            logger.error("Erro no formato JSON recebido.")
+            return JsonResponse({'status': 'error', 'message': 'Formato JSON inválido'}, status=400)
+        except Exception as e:
+            logger.error(f"Erro interno ao criar instalação: {str(e)}")
+            return JsonResponse({'status': 'error', 'message': f'Erro interno: {str(e)}'}, status=500)
+
+    logger.warning("Método HTTP não permitido.")
+    return HttpResponseNotAllowed(['POST'])

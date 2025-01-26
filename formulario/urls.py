@@ -1,9 +1,8 @@
 from django.urls import path
-
-from backend import views
-from .views import salvar_respostas, obter_respostas
+from .views import salvar_respostas, obter_respostas, obter_todas_respostas
 
 urlpatterns = [
     path('salvar/', salvar_respostas, name='salvar_respostas'),
-    path('formulario/salvar/', views.salvar_formulario, name='salvar_formulario'),
+    path('obter/<str:numero_instalacao>/', obter_respostas, name='obter_respostas'),
+    path('obter_todas/', obter_todas_respostas, name='obter_todas_respostas'),
 ]

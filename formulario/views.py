@@ -1,8 +1,13 @@
+from urllib import request
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponseNotAllowed
 from .models import Resposta
 from django.views.decorators.csrf import csrf_exempt
 import json
+
+
+print(f"Dados recebidos no endpoint: {request.body}")
+
 
 @csrf_exempt
 def salvar_respostas(request):
@@ -63,6 +68,41 @@ def obter_respostas(request, numero_instalacao):
                 'comentarios': {resposta.pergunta_id: resposta.comentario for resposta in respostas},
                 'tecnico': respostas.first().tecnico if respostas.exists() else ""
             }
+
+            return JsonResponse({'status': 'success', 'data': data})
+
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': f'Erro interno: {str(e)}'}, status=500)
+
+    # Retornar erro se o método não for GET
+    return HttpResponseNotAllowed(['GET'])
+
+@csrf_exempt
+def obter_todas_respostas(request):
+    """
+    Endpoint para obter todas as respostas.
+    """
+    if request.method == 'GET':
+        try:
+            # Buscar todas as respostas no banco de dados
+            respostas = Resposta.objects.all()
+
+            # Verificar se existem respostas
+            if not respostas.exists():
+                return JsonResponse({'status': 'error', 'message': 'Nenhuma resposta encontrada'}, status=404)
+
+            # Construir a resposta JSON com os dados
+            data = [
+                {
+                    'numero_instalacao': resposta.numero_instalacao,
+                    'pergunta_id': resposta.pergunta_id,
+                    'resposta': resposta.resposta,
+                    'comentario': resposta.comentario,
+                    'tecnico': resposta.tecnico,
+                    'data': resposta.data
+                }
+                for resposta in respostas
+            ]
 
             return JsonResponse({'status': 'success', 'data': data})
 

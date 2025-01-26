@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseNotAllowed
 from .models import Resposta
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -24,6 +24,8 @@ def salvar_respostas(request):
             )
 
         return JsonResponse({'status': 'success'})
+    else:
+        return HttpResponseNotAllowed(['POST'])
 
 @csrf_exempt
 def obter_respostas(request, numero_instalacao):

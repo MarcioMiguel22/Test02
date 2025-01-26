@@ -29,6 +29,9 @@ def salvar_respostas(request):
                 logger.warning("Dados obrigatórios ausentes.")
                 return JsonResponse({'status': 'error', 'message': 'Dados obrigatórios ausentes'}, status=400)
 
+            # Deletar dados existentes antes de salvar novos (Chama a função diretamente)
+            deletar_respostas(request, numero_instalacao)
+
             # Salvar ou atualizar cada resposta no banco de dados
             for pergunta_id, resposta in respostas.items():
                 comentario = comentarios.get(pergunta_id, "")
@@ -53,6 +56,7 @@ def salvar_respostas(request):
 
     logger.warning("Método HTTP não permitido.")
     return HttpResponseNotAllowed(['POST'])
+
 
 @csrf_exempt
 def obter_respostas(request, numero_instalacao):
@@ -165,3 +169,31 @@ def criar_instalacao(request):
 
     logger.warning("Método HTTP não permitido.")
     return HttpResponseNotAllowed(['POST'])
+
+
+@csrf_exempt
+def deletar_respostas(request, numero_instalacao):
+    """
+    Endpoint para deletar respostas relacionadas a uma instalação específica.
+    """
+    if request.method == 'DELETE':
+        try:
+            logger.info(f"Requisição para deletar respostas da instalação {numero_instalacao}.")
+            
+            # Filtrar e deletar as respostas associadas ao número de instalação
+            respostas = Resposta.objects.filter(numero_instalacao=numero_instalacao)
+            
+            if not respostas.exists():
+                logger.warning(f"Nenhuma resposta encontrada para a instalação {numero_instalacao}.")
+                return JsonResponse({'status': 'error', 'message': 'Nenhuma resposta encontrada'}, status=404)
+            
+            respostas.delete()  # Deletar todos os registros
+            logger.info(f"Respostas da instalação {numero_instalacao} deletadas com sucesso.")
+            return JsonResponse({'status': 'success', 'message': 'Respostas deletadas com sucesso!'})
+        
+        except Exception as e:
+            logger.error(f"Erro interno ao deletar respostas: {str(e)}")
+            return JsonResponse({'status': 'error', 'message': f'Erro interno: {str(e)}'}, status=500)
+    
+    logger.warning("Método HTTP não permitido.")
+    return HttpResponseNotAllowed(['DELETE'])

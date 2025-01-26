@@ -1,13 +1,12 @@
-from urllib import request
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponseNotAllowed
-from .models import Resposta
 from django.views.decorators.csrf import csrf_exempt
+from .models import Resposta
 import json
+import logging
 
-
-print(f"Dados recebidos no endpoint: {request.body}")
-
+# Configuração de log
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def salvar_respostas(request):
@@ -16,18 +15,21 @@ def salvar_respostas(request):
     """
     if request.method == 'POST':
         try:
-            # Carregar e validar os dados do corpo da requisição
+            logger.info("Requisição recebida para salvar respostas.")
             data = json.loads(request.body)
+
+            # Extrair dados da requisição
             numero_instalacao = data.get('numeroInstalacao')
             respostas = data.get('respostas', {})
             comentarios = data.get('comentarios', {})
             tecnico = data.get('tecnico')
 
-            # Verificar se os campos obrigatórios foram fornecidos
+            # Validar dados obrigatórios
             if not numero_instalacao or not tecnico or not respostas:
+                logger.warning("Dados obrigatórios ausentes.")
                 return JsonResponse({'status': 'error', 'message': 'Dados obrigatórios ausentes'}, status=400)
 
-            # Salvar as respostas no banco de dados
+            # Salvar cada resposta no banco de dados
             for pergunta_id, resposta in respostas.items():
                 comentario = comentarios.get(pergunta_id, "")
                 Resposta.objects.create(
@@ -37,15 +39,17 @@ def salvar_respostas(request):
                     comentario=comentario,
                     tecnico=tecnico
                 )
-
+            logger.info(f"Respostas salvas para a instalação {numero_instalacao}.")
             return JsonResponse({'status': 'success', 'message': 'Respostas salvas com sucesso!'})
 
         except json.JSONDecodeError:
+            logger.error("Erro no formato JSON recebido.")
             return JsonResponse({'status': 'error', 'message': 'Formato JSON inválido'}, status=400)
         except Exception as e:
+            logger.error(f"Erro interno ao salvar respostas: {str(e)}")
             return JsonResponse({'status': 'error', 'message': f'Erro interno: {str(e)}'}, status=500)
 
-    # Retornar erro se o método não for POST
+    logger.warning("Método HTTP não permitido.")
     return HttpResponseNotAllowed(['POST'])
 
 @csrf_exempt
@@ -55,26 +59,27 @@ def obter_respostas(request, numero_instalacao):
     """
     if request.method == 'GET':
         try:
-            # Buscar respostas no banco de dados
+            logger.info(f"Requisição para obter respostas da instalação {numero_instalacao}.")
             respostas = Resposta.objects.filter(numero_instalacao=numero_instalacao)
 
-            # Verificar se existem respostas
             if not respostas.exists():
+                logger.warning(f"Nenhuma resposta encontrada para a instalação {numero_instalacao}.")
                 return JsonResponse({'status': 'error', 'message': 'Nenhuma resposta encontrada'}, status=404)
 
-            # Construir a resposta JSON com os dados
+            # Construir resposta JSON
             data = {
                 'respostas': {resposta.pergunta_id: resposta.resposta for resposta in respostas},
                 'comentarios': {resposta.pergunta_id: resposta.comentario for resposta in respostas},
-                'tecnico': respostas.first().tecnico if respostas.exists() else ""
+                'tecnico': respostas.first().tecnico
             }
-
+            logger.info(f"Respostas obtidas com sucesso para a instalação {numero_instalacao}.")
             return JsonResponse({'status': 'success', 'data': data})
 
         except Exception as e:
+            logger.error(f"Erro interno ao obter respostas: {str(e)}")
             return JsonResponse({'status': 'error', 'message': f'Erro interno: {str(e)}'}, status=500)
 
-    # Retornar erro se o método não for GET
+    logger.warning("Método HTTP não permitido.")
     return HttpResponseNotAllowed(['GET'])
 
 @csrf_exempt
@@ -84,14 +89,14 @@ def obter_todas_respostas(request):
     """
     if request.method == 'GET':
         try:
-            # Buscar todas as respostas no banco de dados
+            logger.info("Requisição para obter todas as respostas.")
             respostas = Resposta.objects.all()
 
-            # Verificar se existem respostas
             if not respostas.exists():
+                logger.warning("Nenhuma resposta encontrada.")
                 return JsonResponse({'status': 'error', 'message': 'Nenhuma resposta encontrada'}, status=404)
 
-            # Construir a resposta JSON com os dados
+            # Construir resposta JSON
             data = [
                 {
                     'numero_instalacao': resposta.numero_instalacao,
@@ -103,11 +108,12 @@ def obter_todas_respostas(request):
                 }
                 for resposta in respostas
             ]
-
+            logger.info("Todas as respostas foram obtidas com sucesso.")
             return JsonResponse({'status': 'success', 'data': data})
 
         except Exception as e:
+            logger.error(f"Erro interno ao obter todas as respostas: {str(e)}")
             return JsonResponse({'status': 'error', 'message': f'Erro interno: {str(e)}'}, status=500)
 
-    # Retornar erro se o método não for GET
+    logger.warning("Método HTTP não permitido.")
     return HttpResponseNotAllowed(['GET'])

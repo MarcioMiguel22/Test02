@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'nome_do_app',
+    'formulario',
 ]
 
 MIDDLEWARE = [

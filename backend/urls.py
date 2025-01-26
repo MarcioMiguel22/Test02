@@ -23,5 +23,8 @@ urlpatterns = [
     path('api/', include('nome_do_app.urls')),
     path('', home, name='home'),  # Add this line to include the home view
     path('api/codigos/', CodigoListCreateAPIView.as_view(), name='codigo-list-create'),  # Add this line to include the CodigoListCreateAPIView
-    path('api/codigos/<int:pk>/', CodigoEntradaViewSet.as_view({'put': 'update'}), name='codigo-update'),  # Add this line for updating a single entry
+    path('api/codigos/<int:pk>/', CodigoEntradaViewSet.as_view({'put': 'update'}), name='codigo-update'),
+    path('formulario/', include('formulario.urls')),  
+      
+      # Add this line for updating a single entry
 ]

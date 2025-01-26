@@ -72,7 +72,8 @@ def obter_respostas(request, numero_instalacao):
             data = {
                 'respostas': {resposta.pergunta_id: resposta.resposta for resposta in respostas},
                 'comentarios': {resposta.pergunta_id: resposta.comentario for resposta in respostas},
-                'tecnico': respostas.first().tecnico
+                'tecnico': respostas.first().tecnico,
+                'data_ultima_atualizacao': respostas.latest('data').data
             }
             logger.info(f"Respostas obtidas com sucesso para a instalação {numero_instalacao}.")
             return JsonResponse({'status': 'success', 'data': data})

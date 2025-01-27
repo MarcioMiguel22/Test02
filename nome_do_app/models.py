@@ -31,12 +31,13 @@ class CodigoEntrada(models.Model):
         max_length=255,
         help_text="Código adicional (por exemplo, 'caves')."
     )
-    local_de_chaves = models.CharField(  # Changed from local_da_chave
+    local_de_chaves = models.CharField(
         max_length=255,
         blank=True,
-        default='',
+        null=True,  # Permite armazenar valores NULL no banco
         help_text="Localização das chaves"
     )
+
     administracao = models.CharField(
         max_length=255,
         blank=True,

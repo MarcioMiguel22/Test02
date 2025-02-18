@@ -15,3 +15,10 @@ class Avaria(models.Model):
 
     def __str__(self):
         return f"{self.localizacao} - {self.instalacao} - {self.data_da_avaria}"
+
+class Material(models.Model):
+    codigo = models.CharField(max_length=255)
+    descricao = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.codigo} - {self.descricao}"

@@ -6,3 +6,9 @@ class AvariaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Avaria
         fields = '__all__'
+
+
+class MaterialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Material
+        fields = '__all__'

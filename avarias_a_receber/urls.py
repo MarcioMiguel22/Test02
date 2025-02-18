@@ -1,0 +1,8 @@
+from django.urls import path
+from ..Avarias_a_receber import views
+
+urlpatterns = [
+    
+    path('avarias/', views.AvariaListCreate.as_view(), name='avarias-list-create'),
+    path('avarias/<int:pk>/', views.AvariaRetrieveUpdateDestroy.as_view(), name='avarias-retrieve-update-destroy'),
+]

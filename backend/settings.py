@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'nome_do_app',
     'formulario',
+    'avarias_a_receber'
 ]
 
 MIDDLEWARE = [

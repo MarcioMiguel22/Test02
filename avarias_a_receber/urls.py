@@ -1,5 +1,5 @@
 from django.urls import path
-from ..Avarias_a_receber import views
+from ..Avarias_a_receber import views # type: ignore
 
 urlpatterns = [
     

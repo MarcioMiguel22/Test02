@@ -9,6 +9,10 @@ class Avaria(models.Model):
     estado_do_elevador = models.CharField(max_length=255)
     pago = models.CharField(max_length=3, choices=[('Sim', 'Sim'), ('Não', 'Não')], default='Não')
     notas = models.TextField(blank=True, null=True)
+    inicio_deslocacao1 = models.CharField(max_length=255, blank=True, null=True)
+    fim_deslocacao1 = models.CharField(max_length=255, blank=True, null=True)
+    inicio_deslocacao2 = models.CharField(max_length=255, blank=True, null=True)
+    fim_deslocacao2 = models.CharField(max_length=255, blank=True, null=True)
     codigo_material = models.CharField(max_length=255, blank=True, null=True)
     descricao_material = models.CharField(max_length=255, blank=True, null=True)
 

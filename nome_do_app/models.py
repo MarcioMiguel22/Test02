@@ -25,10 +25,14 @@ class CodigoEntrada(models.Model):
         help_text="Nome único ou identificador da instalação (ex: 'Sala 101')."
     )
     codigos_da_porta = models.TextField(
-        help_text="Códigos de acesso à porta, separados por vírgula."
+         help_text="Códigos de acesso à porta, separados por vírgula.",
+         blank=True,
+         null=True,
     )
     codigo_caves = models.CharField(
         max_length=255,
+        blank=True,
+        null=True,
         help_text="Código adicional (por exemplo, 'caves')."
     )
     local_de_chaves = models.CharField(
@@ -41,12 +45,14 @@ class CodigoEntrada(models.Model):
     administracao = models.CharField(
         max_length=255,
         blank=True,
+        null=True,
         default='',
         help_text="Informação sobre administração"
     )
     tipo_de_contrato = models.CharField(
         max_length=255,
         blank=True,
+        null=True,
         default='',
         help_text="Tipo do contrato"
     )

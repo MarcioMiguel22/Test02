@@ -21,6 +21,7 @@ from nome_do_app.views import home, CodigoListCreateAPIView, CodigoEntradaViewSe
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('nome_do_app.urls')),
+    path('api/avarias/', include('avarias_a_receber.urls')),
     path('', home, name='home'),
     path('api/codigos/', CodigoListCreateAPIView.as_view(), name='codigo-list-create'),
     path('api/codigos/<int:pk>/', CodigoEntradaViewSet.as_view({'put': 'update'}), name='codigo-update'),

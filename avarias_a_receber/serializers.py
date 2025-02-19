@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Avaria, Material  # Corrected import
+from .models import Avaria, Material
 
 class AvariaSerializer(serializers.ModelSerializer):
     class Meta:

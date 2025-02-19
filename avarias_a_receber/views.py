@@ -2,10 +2,8 @@ from django.shortcuts import render
 
 # Create your views here.
 from rest_framework import generics
-from ..models import Avaria, Material  # type: ignore
-from ..avarias_a_receber.serializers import AvariaSerializer, MaterialSerializer
-
-
+from .models import Avaria, Material  # Corrected import
+from .serializers import AvariaSerializer, MaterialSerializer  # Corrected import
 
 class AvariaListCreate(generics.ListCreateAPIView):
     queryset = Avaria.objects.all()

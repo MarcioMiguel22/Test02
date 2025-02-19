@@ -23,6 +23,11 @@ class AvariaRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = Avaria.objects.all()
     serializer_class = AvariaSerializer
 
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 class MaterialListCreate(generics.ListCreateAPIView):
     queryset = Material.objects.all()
     serializer_class = MaterialSerializer
@@ -30,3 +35,8 @@ class MaterialListCreate(generics.ListCreateAPIView):
 class MaterialRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = Material.objects.all()
     serializer_class = MaterialSerializer
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)

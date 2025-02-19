@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views  # Corrected import
+from . import views
 
 urlpatterns = [
     path('', views.AvariaListCreate.as_view(), name='avarias-list-create'),

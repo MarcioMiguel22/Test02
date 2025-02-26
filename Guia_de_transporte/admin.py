@@ -1,7 +1,4 @@
 from django.contrib import admin
+from .models import Informacao
 
-# Register your models here.
-
-from .models import TransportItem
-
-admin.site.register(TransportItem)
+admin.site.register(Informacao)

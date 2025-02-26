@@ -1,9 +1,18 @@
 from django.db import models
 
-class Informacao(models.Model):
-    titulo = models.CharField(max_length=100)
+class GuiaDeTransporte(models.Model):
+    item = models.CharField(max_length=100)
     descricao = models.TextField()
-    data_criacao = models.DateTimeField(auto_now_add=True)
+    unidade = models.CharField(max_length=50)
+    quantidade = models.IntegerField(default=0)
+    peso = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    volume = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Guia de Transporte'
+        verbose_name_plural = 'Guias de Transporte'
 
     def __str__(self):
-        return self.titulo
+        return f"{self.item} - {self.descricao[:50]}"

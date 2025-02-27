@@ -1,3 +1,8 @@
+"""
+Documento de Configuração do Aplicativo Guia de Transporte.
+Define as configurações básicas da aplicação Django para Guia de Transporte,
+como o campo de auto incremento padrão e o nome do aplicativo.
+"""
 from django.apps import AppConfig
 
 

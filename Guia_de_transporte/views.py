@@ -1,7 +1,7 @@
 from rest_framework import viewsets
-from .models import Informacao
-from .serializers import InformacaoSerializer
+from .models import GuiaDeTransporte
+from .serializers import GuiaDeTransporteSerializer
 
-class InformacaoViewSet(viewsets.ModelViewSet):
-    queryset = Informacao.objects.all()
-    serializer_class = InformacaoSerializer
+class GuiaDeTransporteViewSet(viewsets.ModelViewSet):
+    queryset = GuiaDeTransporte.objects.all()
+    serializer_class = GuiaDeTransporteSerializer

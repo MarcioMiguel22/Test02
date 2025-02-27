@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .models import Informacao
+from .models import GuiaDeTransporte
 
-class InformacaoSerializer(serializers.ModelSerializer):
+class GuiaDeTransporteSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Informacao
+        model = GuiaDeTransporte
         fields = '__all__'

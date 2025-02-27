@@ -1,8 +1,12 @@
+"""
+Documento de Administração para Guia de Transporte.
+Configura a interface de administração do Django para os modelos da aplicação,
+incluindo customizações como campos de exibição, filtros e busca.
+"""
 from django.contrib import admin
-from .models import Informacao, GuiaDeTransporte
+from .models import GuiaDeTransporte
 
-admin.site.register(Informacao)
-
+# Registro customizado do modelo GuiaDeTransporte
 @admin.register(GuiaDeTransporte)
 class GuiaDeTransporteAdmin(admin.ModelAdmin):
     list_display = ('item', 'descricao', 'unidade', 'quantidade', 'created_at')

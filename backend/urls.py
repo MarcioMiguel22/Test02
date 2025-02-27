@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from nome_do_app.views import home, CodigoListCreateAPIView, CodigoEntradaViewSet
+from Guia_de_transporte.views import GuiaDeTransporteViewSet
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,5 +27,6 @@ urlpatterns = [
     path('', home, name='home'),
     path('api/codigos/', CodigoListCreateAPIView.as_view(), name='codigo-list-create'),
     path('api/codigos/<int:pk>/', CodigoEntradaViewSet.as_view({'put': 'update'}), name='codigo-update'),
-    path('formulario/', include('formulario.urls')),  # Ensure this line is present
+    path('formulario/', include('formulario.urls')),  # Ensure this line is present~
+    path('api/guia/', include('Guia_de_transporte.urls')),
 ]

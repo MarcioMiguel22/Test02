@@ -1,3 +1,8 @@
+"""
+Documento de Modelos para Guia de Transporte.
+Define a estrutura de dados para as Guias de Transporte,
+incluindo campos como item, descrição, unidade, quantidade, peso e volume.
+"""
 from django.db import models
 
 class GuiaDeTransporte(models.Model):

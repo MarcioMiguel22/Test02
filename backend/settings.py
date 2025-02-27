@@ -66,7 +66,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'nome_do_app',
     'formulario',
-    'avarias_a_receber'
+    'avarias_a_receber',
+    'Guia_de_transporte',  # Add this line
 ]
 
 MIDDLEWARE = [

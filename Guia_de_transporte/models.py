@@ -16,6 +16,7 @@ class GuiaDeTransporte(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        db_table = 'guia_de_transporte_guiadetransporte'
         verbose_name = 'Guia de Transporte'
         verbose_name_plural = 'Guias de Transporte'
 

@@ -2,12 +2,12 @@ no terminal ecrever railway connect Postgres
 
 
 
-INSERT INTO guia_de_transporte_guiadetransporte (item, descricao, unidade, quantidade, peso, volume, created_at, updated_at) VALUES
+INSERT INTO guia_de_transporte_guiadetransporte (item, descricao, unidade, quantidade, notas, volume, created_at, updated_at) VALUES
 ('Logística', '13/12/2022 Pág. 151', 'UN', 0, 0, 0, NOW(), NOW()),
 ('Logística', '13/12/2022 Pág. 151', 'UN', 0, 0, 0, NOW(), NOW()),
 ('AGRAFES', 'A-20 SIMES REDE ELETROSOLDADA ARAME ZINCADO N12 2,7 ESTICADOR RAMADA ZIN-', 'UN', 0, 0, 0, NOW(), NOW());
 
-INSERT INTO guia_de_transporte_guiadetransporte (item, descricao, unidade, quantidade, peso, volume, created_at, updated_at) VALUES
+INSERT INTO guia_de_transporte_guiadetransporte (item, descricao, unidade, quantidade, notas, volume, created_at, updated_at) VALUES
 ('Logística', '13/12/2022 Pág. 1', 'UN', 0, 0, 0, NOW(), NOW()),
 ('0101032', '0101033 0101034 0101035', 'UN', 0, 0, 0, NOW(), NOW()),
 ('AGRAFES', 'A-20 SIMES REDE ELETROSOLDADA ARAME ZINCADO N12 2,7 ESTICADOR RAMADA ZIN-', 'UN', 0, 0, 0, NOW(), NOW()),

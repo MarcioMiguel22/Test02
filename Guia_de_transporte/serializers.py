@@ -9,4 +9,4 @@ from .models import GuiaDeTransporte
 class GuiaDeTransporteSerializer(serializers.ModelSerializer):
     class Meta:
         model = GuiaDeTransporte
-        fields = '__all__'
+        fields = ['id', 'item', 'descricao', 'unidade', 'quantidade', 'notas', 'volume', 'created_at', 'updated_at']

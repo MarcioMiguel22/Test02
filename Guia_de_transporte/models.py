@@ -1,7 +1,7 @@
 """
 Documento de Modelos para Guia de Transporte.
 Define a estrutura de dados para as Guias de Transporte,
-incluindo campos como item, descrição, unidade, quantidade, peso e volume.
+incluindo campos como item, descrição, unidade, quantidade, notas e volume.
 """
 from django.db import models
 
@@ -10,8 +10,8 @@ class GuiaDeTransporte(models.Model):
     descricao = models.TextField()
     unidade = models.CharField(max_length=50)
     quantidade = models.IntegerField(default=0)
-    peso = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    volume = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    notas = models.TextField(blank=True)  # Campo renomeado de peso para notas
+    volume = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

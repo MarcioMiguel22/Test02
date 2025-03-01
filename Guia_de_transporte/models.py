@@ -10,7 +10,7 @@ class GuiaDeTransporte(models.Model):
     descricao = models.TextField()
     unidade = models.CharField(max_length=50)
     quantidade = models.IntegerField()
-    notas = models.IntegerField()  # Alterado de peso para notas
+    notas = models.TextField(blank=True, null=True)  # Alterado para TextField para permitir texto longo
     volume = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

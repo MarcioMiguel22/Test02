@@ -10,4 +10,4 @@ class GuiaDeTransporteSerializer(serializers.ModelSerializer):
     class Meta:
         model = GuiaDeTransporte
         fields = ['id', 'item', 'descricao', 'em_falta', 'quantidade', 'notas', 'total', 'created_at', 'updated_at']
-        # Changed 'unidade' to 'em_falta' and 'volume' to 'total' to match the updated model field names
+        # Alterado 'unidade' para 'em_falta' e 'volume' para 'total' para corresponder aos nomes dos campos atualizados no modelo

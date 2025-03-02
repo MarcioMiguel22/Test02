@@ -11,7 +11,7 @@ class GuiaDeTransporte(models.Model):
     em_falta = models.IntegerField()  # Alterado para IntegerField para armazenar números
     quantidade = models.IntegerField()
     notas = models.TextField(blank=True, null=True)  # Alterado para TextField para permitir texto longo
-    total = models.IntegerField()  # Já era IntegerField, não precisa mudar
+    total = models.IntegerField(default=0)  # Adicionar valor padrão
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

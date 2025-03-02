@@ -8,10 +8,10 @@ from django.db import models
 class GuiaDeTransporte(models.Model):
     item = models.CharField(max_length=100)
     descricao = models.TextField()
-    em_falta = models.IntegerField()  # Alterado para IntegerField para armazenar números
+    em_falta = models.CharField(max_length=50)  # Alterado para CharField para aceitar valores como 'UN'
     quantidade = models.IntegerField()
-    notas = models.TextField(blank=True, null=True)  # Alterado para TextField para permitir texto longo
-    total = models.IntegerField(default=0)  # Adicionar valor padrão
+    notas = models.TextField(blank=True, null=True)
+    total = models.CharField(max_length=50, default='0')  # Também alterado para CharField por consistência
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

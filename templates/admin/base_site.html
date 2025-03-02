@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-    {{ title }} | {{ site_title|default:_('Meu Painel Administrativo') }}
+    {{ title }} | {{ site_title|default:_('Elevachecks.com') }}
 {% endblock %}
 
 {% block extrastyle %}
@@ -14,8 +14,8 @@
 {% block branding %}
 <h1 id="site-name" class="text-primary text-center my-4">
     <a href="{% url 'admin:index' %}" style="text-decoration: none;">
-        <img src="{% static 'images/logo.png' %}" alt="Logo" style="height: 50px; vertical-align: middle;">
-        <span>Meu Painel Administrativo</span>
+        <!-- Logo removido -->
+        <span>Elevachecks.com</span>
     </a>
 </h1>
 {% endblock %}
@@ -29,15 +29,10 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Página Inicial</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Sobre</a>
-                    </li>
+                    <!-- Botões removidos -->
                 </ul>
-                <form class="d-flex">
-                    <input class="form-control me-2" type="search" placeholder="Pesquisar" aria-label="Search">
+                <form class="d-flex" action="{% url 'admin:index' %}" method="get">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Pesquisar" aria-label="Search">
                     <button class="btn btn-outline-light" type="submit">Pesquisar</button>
                 </form>
             </div>
@@ -52,7 +47,7 @@
             <h2 class="mb-0">Painel de Controle</h2>
         </div>
         <div class="card-body">
-            <p class="lead">Bem-vindo ao Meu Painel Administrativo. Aqui você pode gerenciar os dados do sistema de forma fácil e eficiente.</p>
+            <p class="lead">Bem-vindo ao Elevachecks.com. Aqui você pode gerenciar os dados do sistema de forma fácil e eficiente.</p>
         </div>
     </div>
 </div>
@@ -61,7 +56,9 @@
 {% block footer %}
 <footer class="bg-light text-center text-lg-start mt-auto">
     <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
-        © {{ current_year }} Meu Painel Administrativo. Todos os direitos reservados.
+        © {{ current_year }} Elevachecks.com. Todos os direitos reservados.
+        <br>
+        <small class="text-muted">Versão 1.1.0</small>
     </div>
 </footer>
 {% endblock %}

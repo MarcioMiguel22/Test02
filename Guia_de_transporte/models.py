@@ -8,10 +8,10 @@ from django.db import models
 class GuiaDeTransporte(models.Model):
     item = models.CharField(max_length=100)
     descricao = models.TextField()
-    unidade = models.CharField(max_length=50)
+    em_falta = models.IntegerField()  # Alterado para IntegerField para armazenar números
     quantidade = models.IntegerField()
     notas = models.TextField(blank=True, null=True)  # Alterado para TextField para permitir texto longo
-    volume = models.IntegerField()
+    total = models.IntegerField()  # Já era IntegerField, não precisa mudar
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

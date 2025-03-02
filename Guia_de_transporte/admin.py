@@ -9,6 +9,6 @@ from .models import GuiaDeTransporte
 # Registro customizado do modelo GuiaDeTransporte
 @admin.register(GuiaDeTransporte)
 class GuiaDeTransporteAdmin(admin.ModelAdmin):
-    list_display = ('item', 'descricao', 'unidade', 'quantidade', 'created_at')
+    list_display = ('item', 'descricao', 'em_falta', 'quantidade', 'total', 'created_at')
     search_fields = ('item', 'descricao')
-    list_filter = ('created_at', 'unidade')
+    list_filter = ('created_at', 'em_falta', 'total')

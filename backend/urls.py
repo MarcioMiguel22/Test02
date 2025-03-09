@@ -27,9 +27,8 @@ urlpatterns = [
     path('', home, name='home'),
     path('api/codigos/', CodigoListCreateAPIView.as_view(), name='codigo-list-create'),
     path('api/codigos/<int:pk>/', CodigoEntradaViewSet.as_view({'put': 'update'}), name='codigo-update'),
-    path('formulario/', include('formulario.urls')),  # Ensure this line is present~
+    path('formulario/', include('formulario.urls')),
     path('api/guia/', include('Guia_de_transporte.urls')),
-    
-    # Add the new URL pattern for the plural version
+    path('api/', include('Registros_de_Entregas.urls')),
     path('api/guias/', GuiaDeTransporteListCreateView.as_view(), name='guia-list-create'),
 ]

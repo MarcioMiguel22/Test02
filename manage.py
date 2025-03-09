@@ -3,6 +3,8 @@
 import os
 import sys
 
+# Add a debug print statement to identify the settings module
+print(f"Using settings module: {os.environ.get('DJANGO_SETTINGS_MODULE', 'default from manage.py')}")
 
 def main():
     """Run administrative tasks."""

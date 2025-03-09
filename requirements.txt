@@ -1,8 +1,8 @@
 asgiref==3.8.1
 Django>=4.2,<5.0
-django-cors-headers==4.6.0
-djangorestframework==3.15.2
-djangorestframework_simplejwt==5.4.0
+django-cors-headers>=3.10.0
+djangorestframework>=3.13.0
+djangorestframework_simplejwt>=5.4.0
 gunicorn
 packaging==24.2
 psycopg2-binary==2.9.10

@@ -70,7 +70,8 @@ INSTALLED_APPS = [
     'formulario',
     'avarias_a_receber',
     'Guia_de_transporte', 
-    'Registros_de_Entregas',  # Changed from 'Registros_de_Entrada'
+    'Registros_de_Entregas',
+    'authentication',
 ]
 
 MIDDLEWARE = [

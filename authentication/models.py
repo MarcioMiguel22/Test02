@@ -5,7 +5,8 @@ from django.dispatch import receiver
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
+    # Replace ImageField with URLField or CharField
+    profile_picture_url = models.URLField(max_length=255, blank=True, null=True)  # Store image URL instead of actual image
     bio = models.TextField(max_length=500, blank=True)
     phone_number = models.CharField(max_length=15, blank=True)
     address = models.CharField(max_length=255, blank=True)
@@ -22,7 +23,8 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
 
 # Se você quiser registrar esse modelo no admin, adicione ao admin.py:
 # from .models import UserProfile

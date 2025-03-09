@@ -65,10 +65,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    'django_filters',  # Add this for using filters in DRF
     'nome_do_app',
     'formulario',
     'avarias_a_receber',
-    'Guia_de_transporte',  # Add this line
+    'Guia_de_transporte', 
+    'Registros_de_Entregas',  # Changed from 'Registros_de_Entrada'
 ]
 
 MIDDLEWARE = [

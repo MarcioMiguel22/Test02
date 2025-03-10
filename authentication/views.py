@@ -17,27 +17,37 @@ def login_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
 
-    user = authenticate(username=username, password=password)
-    
-    if user:
-        # Generate JWT tokens for the authenticated user
-        refresh = RefreshToken.for_user(user)
-        
-        # Authentication successful
+    if not username or not password:
         return Response({
-            "status": "success",
-            "message": "Login realizado com sucesso!",
-            "tokens": {
-                "access": str(refresh.access_token),
-                "refresh": str(refresh)
-            }
-        }, status=status.HTTP_200_OK)
-    else:
-        # Authentication failed
+            'status': 'error',
+            'message': 'Usuário e senha são obrigatórios.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
         return Response({
-            "status": "error",
-            "message": "Usuário ou senha inválidos."
+            'status': 'error',
+            'message': 'Usuário não encontrado.'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    if not user.check_password(password):
+        return Response({
+            'status': 'error',
+            'message': 'Senha incorreta.'
         }, status=status.HTTP_401_UNAUTHORIZED)
+
+    # Generate tokens for authenticated user
+    refresh = RefreshToken.for_user(user)
+    
+    return Response({
+        'status': 'success',
+        'message': 'Login realizado com sucesso.',
+        'tokens': {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+    })
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -45,41 +55,32 @@ def register_view(request):
     username = request.data.get('username')
     email = request.data.get('email')
     password = request.data.get('password')
-    
-    # Validate input data
-    if not all([username, email, password]):
+
+    if not username or not email or not password:
         return Response({
-            "status": "error", 
-            "message": "Todos os campos são obrigatórios."
+            'status': 'error',
+            'message': 'Todos os campos são obrigatórios.'
         }, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Check if username already exists
+
     if User.objects.filter(username=username).exists():
         return Response({
-            "status": "error", 
-            "message": "Este nome de usuário já está em uso."
+            'status': 'error',
+            'message': 'Este nome de usuário já está em uso.'
         }, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Check if email already exists
+
     if User.objects.filter(email=email).exists():
         return Response({
-            "status": "error", 
-            "message": "Este email já está em uso."
+            'status': 'error',
+            'message': 'Este e-mail já está registrado.'
         }, status=status.HTTP_400_BAD_REQUEST)
-    
+
     # Create new user
-    try:
-        user = User.objects.create_user(username=username, email=email, password=password)
-        
-        return Response({
-            "status": "success",
-            "message": "Registro realizado com sucesso!"
-        }, status=status.HTTP_201_CREATED)
-    except Exception as e:
-        return Response({
-            "status": "error",
-            "message": f"Erro ao criar usuário: {str(e)}"
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    user = User.objects.create_user(username=username, email=email, password=password)
+    
+    return Response({
+        'status': 'success',
+        'message': 'Usuário registrado com sucesso.'
+    }, status=status.HTTP_201_CREATED)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -88,89 +89,82 @@ def request_password_reset(request):
     
     if not email:
         return Response({
-            "status": "error", 
-            "message": "Email é obrigatório."
+            'status': 'error',
+            'message': 'Email é obrigatório.'
         }, status=status.HTTP_400_BAD_REQUEST)
     
     try:
         user = User.objects.get(email=email)
-        
-        # Generate password reset token
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = default_token_generator.make_token(user)
-        
-        # Create password reset link
-        reset_link = f"{settings.FRONTEND_URL}/reset-password/{uid}/{token}"
-        
-        # Send email with reset link
-        send_mail(
-            subject="Recuperação de senha",
-            message=f"Olá {user.username},\n\nVocê solicitou a recuperação de senha. Clique no link abaixo para redefinir sua senha:\n\n{reset_link}\n\nSe você não solicitou esta alteração, ignore este email.\n\nAtenciosamente,\nEquipe de suporte",
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[email],
-            fail_silently=False
-        )
-        
-        return Response({
-            "status": "success",
-            "message": "Enviamos um email com instruções para recuperar sua senha."
-        }, status=status.HTTP_200_OK)
-    
     except User.DoesNotExist:
-        # For security reasons, don't reveal that the email doesn't exist
+        # We don't want to reveal if a user exists or not
         return Response({
-            "status": "success",
-            "message": "Se o email estiver cadastrado em nosso sistema, enviaremos instruções para recuperar a senha."
-        }, status=status.HTTP_200_OK)
+            'status': 'success',
+            'message': 'Se o email for válido, você receberá instruções para redefinir sua senha.'
+        })
     
+    # Generate uid and token
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    
+    # Create reset URL - adjust the domain based on your frontend URL
+    reset_url = f"{settings.FRONTEND_URL}/reset-password/{uid}/{token}"
+    
+    # Send email
+    try:
+        send_mail(
+            subject='Redefinição de senha',
+            message=f'Para redefinir sua senha, acesse o link: {reset_url}',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            fail_silently=False,
+        )
     except Exception as e:
         return Response({
-            "status": "error",
-            "message": "Não foi possível processar sua solicitação."
+            'status': 'error',
+            'message': 'Erro ao enviar o email de redefinição.'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    return Response({
+        'status': 'success',
+        'message': 'Instruções para redefinição de senha foram enviadas para o seu email.'
+    })
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def reset_password(request):
     uid = request.data.get('uid')
     token = request.data.get('token')
-    new_password = request.data.get('password')
+    password = request.data.get('password')
     
-    if not all([uid, token, new_password]):
+    if not uid or not token or not password:
         return Response({
-            "status": "error",
-            "message": "Todos os campos são obrigatórios."
+            'status': 'error',
+            'message': 'Todos os campos são obrigatórios.'
         }, status=status.HTTP_400_BAD_REQUEST)
     
     try:
-        # Decode user id
+        # Decode user ID
         user_id = force_str(urlsafe_base64_decode(uid))
         user = User.objects.get(pk=user_id)
         
-        # Verify token is valid
+        # Verify token
         if not default_token_generator.check_token(user, token):
             return Response({
-                "status": "error",
-                "message": "Link de recuperação inválido ou expirado."
+                'status': 'error',
+                'message': 'Token inválido ou expirado.'
             }, status=status.HTTP_400_BAD_REQUEST)
         
         # Set new password
-        user.set_password(new_password)
+        user.set_password(password)
         user.save()
         
         return Response({
-            "status": "success",
-            "message": "Senha atualizada com sucesso. Agora você pode fazer login com sua nova senha."
-        }, status=status.HTTP_200_OK)
-    
-    except (User.DoesNotExist, ValueError, TypeError):
+            'status': 'success',
+            'message': 'Senha alterada com sucesso.'
+        })
+        
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         return Response({
-            "status": "error",
-            "message": "Link de recuperação inválido ou expirado."
+            'status': 'error',
+            'message': 'Link inválido.'
         }, status=status.HTTP_400_BAD_REQUEST)
-    
-    except Exception as e:
-        return Response({
-            "status": "error",
-            "message": "Não foi possível resetar sua senha."
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

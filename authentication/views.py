@@ -6,10 +6,12 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.conf import settings
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
+from .models import UserProfile
+from .serializers import UserProfileSerializer
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -168,3 +170,99 @@ def reset_password(request):
             'status': 'error',
             'message': 'Link inválido.'
         }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def user_profile_view(request):
+    """View for getting and updating user profile information"""
+    user = request.user
+    profile, created = UserProfile.objects.get_or_create(user=user)
+    
+    if request.method == 'GET':
+        serializer = UserProfileSerializer(profile)
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'profile': serializer.data
+        }
+        return Response(user_data)
+    
+    elif request.method == 'PATCH':
+        # Update user data
+        user_data = {}
+        if 'first_name' in request.data:
+            user.first_name = request.data.get('first_name')
+            user_data['first_name'] = user.first_name
+        if 'last_name' in request.data:
+            user.last_name = request.data.get('last_name')
+            user_data['last_name'] = user.last_name
+        if 'email' in request.data:
+            user.email = request.data.get('email')
+            user_data['email'] = user.email
+        user.save()
+        
+        # Update profile data
+        serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            response_data = {
+                'user': user_data,
+                'profile': serializer.data
+            }
+            return Response(response_data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password_view(request):
+    """View for changing user password"""
+    user = request.user
+    current_password = request.data.get('current_password')
+    new_password = request.data.get('new_password')
+    
+    if not current_password or not new_password:
+        return Response({
+            'status': 'error',
+            'message': 'Ambos os campos de senha são obrigatórios.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Check if current password is correct
+    if not user.check_password(current_password):
+        return Response({
+            'status': 'error',
+            'message': 'Senha atual incorreta.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Set new password
+    user.set_password(new_password)
+    user.save()
+    
+    return Response({
+        'status': 'success',
+        'message': 'Senha alterada com sucesso.'
+    })
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def delete_account_view(request):
+    """View for deleting user account"""
+    user = request.user
+    password = request.data.get('password')
+    
+    # Confirm with password for security
+    if not password or not user.check_password(password):
+        return Response({
+            'status': 'error',
+            'message': 'Senha incorreta. Não é possível excluir a conta.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Delete the user account
+    user.delete()
+    
+    return Response({
+        'status': 'success',
+        'message': 'Conta excluída com sucesso.'
+    })

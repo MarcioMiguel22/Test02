@@ -15,6 +15,7 @@ class Avaria(models.Model):
     fim_deslocacao2 = models.CharField(max_length=255, blank=True, null=True)
     codigo_material = models.CharField(max_length=255, blank=True, null=True)
     descricao_material = models.CharField(max_length=255, blank=True, null=True)
+    current_user = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"{self.localizacao} - {self.instalacao} - {self.data_da_avaria}"

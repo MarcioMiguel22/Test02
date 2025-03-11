@@ -16,22 +16,33 @@ from .serializers import UserProfileSerializer
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
-    username = request.data.get('username')
+    credential = request.data.get('username')  # This could be either username or email
     password = request.data.get('password')
 
-    if not username or not password:
+    if not credential or not password:
         return Response({
             'status': 'error',
-            'message': 'Usuário e senha são obrigatórios.'
+            'message': 'Credencial e senha são obrigatórios.'
         }, status=status.HTTP_400_BAD_REQUEST)
 
-    try:
-        user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return Response({
-            'status': 'error',
-            'message': 'Usuário não encontrado.'
-        }, status=status.HTTP_404_NOT_FOUND)
+    user = None
+    # Check if credential is an email
+    if '@' in credential:
+        try:
+            user = User.objects.get(email=credential)
+        except User.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Usuário com este e-mail não encontrado.'
+            }, status=status.HTTP_404_NOT_FOUND)
+    else:
+        try:
+            user = User.objects.get(username=credential)
+        except User.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Usuário não encontrado.'
+            }, status=status.HTTP_404_NOT_FOUND)
 
     if not user.check_password(password):
         return Response({

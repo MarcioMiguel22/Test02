@@ -54,6 +54,7 @@ def login_view(request):
         'status': 'success',
         'message': 'Login realizado com sucesso.',
         'username': user.username,  # Return the actual username
+        'email': user.email,        # Return the user's email
         'tokens': {
             'refresh': str(refresh),
             'access': str(refresh.access_token),

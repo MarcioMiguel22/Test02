@@ -25,29 +25,26 @@ def login_view(request):
             'message': 'Credencial e senha são obrigatórios.'
         }, status=status.HTTP_400_BAD_REQUEST)
 
-    user = None
     # Check if credential is an email
     if '@' in credential:
         try:
             user = User.objects.get(email=credential)
+            username = user.username  # Get the actual username
         except User.DoesNotExist:
             return Response({
                 'status': 'error',
                 'message': 'Usuário com este e-mail não encontrado.'
             }, status=status.HTTP_404_NOT_FOUND)
     else:
-        try:
-            user = User.objects.get(username=credential)
-        except User.DoesNotExist:
-            return Response({
-                'status': 'error',
-                'message': 'Usuário não encontrado.'
-            }, status=status.HTTP_404_NOT_FOUND)
+        username = credential
 
-    if not user.check_password(password):
+    # Authenticate the user
+    user = authenticate(username=username, password=password)
+    
+    if not user:
         return Response({
             'status': 'error',
-            'message': 'Senha incorreta.'
+            'message': 'Credenciais inválidas.'
         }, status=status.HTTP_401_UNAUTHORIZED)
 
     # Generate tokens for authenticated user
@@ -56,6 +53,7 @@ def login_view(request):
     return Response({
         'status': 'success',
         'message': 'Login realizado com sucesso.',
+        'username': user.username,  # Return the actual username
         'tokens': {
             'refresh': str(refresh),
             'access': str(refresh.access_token),

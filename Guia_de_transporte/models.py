@@ -22,3 +22,16 @@ class GuiaDeTransporte(models.Model):
 
     def __str__(self):
         return f"{self.item} - {self.descricao[:50]}"
+
+class TransportItem(models.Model):
+    item = models.CharField(max_length=255)
+    descricao = models.TextField(blank=True, null=True)
+    unidade = models.CharField(max_length=50, default='UN')
+    quantidade = models.IntegerField(default=0)
+    em_falta = models.CharField(max_length=50, default='0')
+    total = models.CharField(max_length=50, default='0')
+    notas = models.TextField(blank=True, null=True)
+    imagem = models.TextField(blank=True, null=True)  # Base64 encoded image
+
+    def __str__(self):
+        return f"{self.item} - {self.descricao}"

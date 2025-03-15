@@ -7,24 +7,49 @@ from rest_framework import viewsets, generics
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
+from rest_framework.decorators import api_view, parser_classes
 from .models import GuiaDeTransporte, TransportItem
 from .serializers import GuiaDeTransporteSerializer, TransportItemSerializer
+import base64
+import os
 
 class GuiaDeTransporteViewSet(viewsets.ModelViewSet):
     queryset = GuiaDeTransporte.objects.all()
     serializer_class = GuiaDeTransporteSerializer
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
 
 class GuiaDeTransporteListCreateView(generics.ListCreateAPIView):
     queryset = GuiaDeTransporte.objects.all()
     serializer_class = GuiaDeTransporteSerializer
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
+
+    def create(self, request, *args, **kwargs):
+        # Processar imagem se enviada como arquivo
+        if 'imagem' in request.FILES:
+            image_file = request.FILES['imagem']
+            image_data = base64.b64encode(image_file.read()).decode('utf-8')
+            image_type = image_file.content_type
+            request.data._mutable = True
+            request.data['imagem'] = f"data:{image_type};base64,{image_data}"
+            request.data._mutable = False
+        
+        return super().create(request, *args, **kwargs)
 
 class TransportItemListCreate(generics.ListCreateAPIView):
     queryset = TransportItem.objects.all()
     serializer_class = TransportItemSerializer
-    parser_classes = (JSONParser, MultiPartParser, FormParser)  # Added parsers for form data
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
 
     def create(self, request, *args, **kwargs):
-        # Handle both JSON and form data
+        # Processar imagem se enviada como arquivo
+        if 'imagem' in request.FILES:
+            image_file = request.FILES['imagem']
+            image_data = base64.b64encode(image_file.read()).decode('utf-8')
+            image_type = image_file.content_type
+            request.data._mutable = True
+            request.data['imagem'] = f"data:{image_type};base64,{image_data}"
+            request.data._mutable = False
+        
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -34,11 +59,21 @@ class TransportItemListCreate(generics.ListCreateAPIView):
 class TransportItemRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = TransportItem.objects.all()
     serializer_class = TransportItemSerializer
-    parser_classes = (JSONParser, MultiPartParser, FormParser)  # Added parsers for form data
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
+        
+        # Processar imagem se enviada como arquivo
+        if 'imagem' in request.FILES:
+            image_file = request.FILES['imagem']
+            image_data = base64.b64encode(image_file.read()).decode('utf-8')
+            image_type = image_file.content_type
+            request.data._mutable = True
+            request.data['imagem'] = f"data:{image_type};base64,{image_data}"
+            request.data._mutable = False
+        
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)

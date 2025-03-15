@@ -9,7 +9,8 @@ from .models import GuiaDeTransporte, TransportItem
 class GuiaDeTransporteSerializer(serializers.ModelSerializer):
     class Meta:
         model = GuiaDeTransporte
-        fields = ['id', 'item', 'descricao', 'em_falta', 'quantidade', 'notas', 'total', 'created_at', 'updated_at']
+        fields = ['id', 'item', 'descricao', 'unidade', 'quantidade', 'peso', 'volume', 
+                 'notas', 'em_falta', 'total', 'imagem', 'created_at', 'updated_at']
 
 class TransportItemSerializer(serializers.ModelSerializer):
     class Meta:

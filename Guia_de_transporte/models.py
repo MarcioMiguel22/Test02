@@ -8,10 +8,14 @@ from django.db import models
 class GuiaDeTransporte(models.Model):
     item = models.CharField(max_length=100)
     descricao = models.TextField()
-    em_falta = models.CharField(max_length=255, null=True, blank=True)  # Alterado para CharField para aceitar valores como 'UN'
+    unidade = models.CharField(max_length=50, default='UN')  # Campo adicionado
     quantidade = models.IntegerField()
+    peso = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Campo adicionado
+    volume = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Campo adicionado
     notas = models.TextField(blank=True, null=True)
-    total = models.CharField(max_length=50, default='0')  # Também alterado para CharField por consistência
+    em_falta = models.CharField(max_length=255, null=True, blank=True)
+    total = models.CharField(max_length=50, default='0')
+    imagem = models.TextField(blank=True, null=True)  # Campo adicionado do TransportItem
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

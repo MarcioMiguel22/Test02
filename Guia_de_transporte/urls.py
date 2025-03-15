@@ -15,4 +15,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('transport-items/', views.TransportItemListCreate.as_view(), name='transport-items-list-create'),
     path('transport-items/<int:pk>/', views.TransportItemRetrieveUpdateDestroy.as_view(), name='transport-items-retrieve-update-destroy'),
+    # Novos endpoints para corresponder ao serviço frontend
+    path('guiaderemeca/', views.TransportItemListCreate.as_view(), name='guiaderemeca-list-create'),
+    path('guiaderemeca/<int:pk>/', views.TransportItemRetrieveUpdateDestroy.as_view(), name='guiaderemeca-retrieve-update-destroy'),
 ]

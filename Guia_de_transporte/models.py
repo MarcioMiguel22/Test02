@@ -32,6 +32,8 @@ class TransportItem(models.Model):
     total = models.CharField(max_length=50, default='0')
     notas = models.TextField(blank=True, null=True)
     imagem = models.TextField(blank=True, null=True)  # Base64 encoded image
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.item} - {self.descricao}"

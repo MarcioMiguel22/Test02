@@ -10,11 +10,13 @@ Um sistema de gerenciamento de guias de transporte desenvolvido com Django e Dja
 - Tracking de itens em falta
 - Suporte para imagens (Base64)
 - Interface administrativa personalizada
+- Logging detalhado para debugging
 
 ## Tecnologias Utilizadas
 - Django
 - Django REST Framework
-- SQLite (banco de dados padrão)
+- PostgreSQL (em produção)
+- JWT para autenticação
 
 ## Instalação
 

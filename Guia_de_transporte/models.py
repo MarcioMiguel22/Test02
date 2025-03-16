@@ -16,6 +16,7 @@ class GuiaDeTransporte(models.Model):
     em_falta = models.CharField(max_length=255, null=True, blank=True)
     total = models.CharField(max_length=50, default='0')
     imagem = models.TextField(blank=True, null=True)  # Campo adicionado do TransportItem
+    username = models.CharField(max_length=150, blank=True, null=True)  # Campo para registrar o usuário
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -73,6 +73,8 @@ INSTALLED_APPS = [
     'Guia_de_transporte', 
     'Registros_de_Entregas',
     'authentication',
+    'Férias',
+
 ]
 
 MIDDLEWARE = [

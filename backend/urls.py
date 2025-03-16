@@ -32,5 +32,5 @@ urlpatterns = [
     path('api/guia/', include('Guia_de_transporte.urls')),
     path('api/', include('Registros_de_Entregas.urls')),
     path('api/guias/', GuiaDeTransporteListCreateView.as_view(), name='guia-list-create'),
-    path('api/vacation/', include('ferias.urls')),
+    path('api/vacation/', include('Férias.urls')),
 ]

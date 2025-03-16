@@ -13,7 +13,7 @@ class GuiaDeTransporteSerializer(serializers.ModelSerializer):
     class Meta:
         model = GuiaDeTransporte
         fields = ['id', 'item', 'descricao', 'unidade', 'quantidade', 'peso', 'volume', 
-                 'notas', 'em_falta', 'total', 'imagem', 'created_at', 'updated_at']
+                 'notas', 'em_falta', 'total', 'imagem', 'username', 'created_at', 'updated_at']
     
     def validate(self, data):
         # Log the validation process for debugging

@@ -21,6 +21,52 @@ class GuiaDeTransporteViewSet(viewsets.ModelViewSet):
     serializer_class = GuiaDeTransporteSerializer
     parser_classes = (JSONParser, MultiPartParser, FormParser)
     
+    def create(self, request, *args, **kwargs):
+        try:
+            logger.info(f"Create request received for GuiaDeTransporte")
+            
+            # Process image if present
+            if 'imagem' in request.FILES:
+                image_file = request.FILES['imagem']
+                image_data = base64.b64encode(image_file.read()).decode('utf-8')
+                image_type = image_file.content_type
+                data = request.data.copy()
+                data['imagem'] = f"data:{image_type};base64,{image_data}"
+            else:
+                data = request.data.copy()
+            
+            # Calculate em_falta automatically
+            quantidade = int(data.get('quantidade', 0))
+            quantidade_total = int(data.get('quantidade_total', 0))
+            
+            if quantidade_total < quantidade:
+                em_falta = str(quantidade - quantidade_total)
+                
+                # Validate that notes/justification is provided when items are missing
+                if not data.get('notas') or not data.get('notas').strip():
+                    return Response(
+                        {"notas": "É necessário justificar os itens em falta nas notas."}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                em_falta = "0"
+                
+            data['em_falta'] = em_falta
+            
+            # Use provided username or a default value
+            if not data.get('username') and request.data.get('current_user'):
+                data['username'] = request.data.get('current_user')
+            
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            
+        except Exception as e:
+            logger.error(f"Error creating GuiaDeTransporte: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -35,10 +81,31 @@ class GuiaDeTransporteViewSet(viewsets.ModelViewSet):
                 image_type = image_file.content_type
                 data = request.data.copy()
                 data['imagem'] = f"data:{image_type};base64,{image_data}"
-                logger.info(f"Image converted to base64, type: {image_type}")
             else:
-                data = request.data
+                data = request.data.copy()
                 logger.info("No image file in request")
+            
+            # Calculate em_falta automatically
+            quantidade = int(data.get('quantidade', instance.quantidade))
+            quantidade_total = int(data.get('quantidade_total', instance.quantidade_total))
+            
+            if quantidade_total < quantidade:
+                em_falta = str(quantidade - quantidade_total)
+                
+                # Validate that notes/justification is provided when items are missing
+                if not data.get('notas') and (not instance.notas or instance.notas.strip() == ''):
+                    return Response(
+                        {"notas": "É necessário justificar os itens em falta nas notas."}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                em_falta = "0"
+                
+            data['em_falta'] = em_falta
+            
+            # Update username from current_user if available
+            if not data.get('username') and request.data.get('current_user'):
+                data['username'] = request.data.get('current_user')
             
             serializer = self.get_serializer(instance, data=data, partial=partial)
             serializer.is_valid(raise_exception=True)
@@ -58,18 +125,47 @@ class GuiaDeTransporteListCreateView(generics.ListCreateAPIView):
     parser_classes = (JSONParser, MultiPartParser, FormParser)
 
     def create(self, request, *args, **kwargs):
-        if 'imagem' in request.FILES:
-            image_file = request.FILES['imagem']
-            image_data = base64.b64encode(image_file.read()).decode('utf-8')
-            image_type = image_file.content_type
-            data = request.data.copy()
-            data['imagem'] = f"data:{image_type};base64,{image_data}"
+        try:
+            # Process image if present
+            if 'imagem' in request.FILES:
+                image_file = request.FILES['imagem']
+                image_data = base64.b64encode(image_file.read()).decode('utf-8')
+                image_type = image_file.content_type
+                data = request.data.copy()
+                data['imagem'] = f"data:{image_type};base64,{image_data}"
+            else:
+                data = request.data.copy()
+                
+            # Calculate em_falta automatically
+            quantidade = int(data.get('quantidade', 0))
+            quantidade_total = int(data.get('quantidade_total', 0))
+            
+            if quantidade_total < quantidade:
+                em_falta = str(quantidade - quantidade_total)
+                
+                # Validate that notes/justification is provided when items are missing
+                if not data.get('notas') or not data.get('notas').strip():
+                    return Response(
+                        {"notas": "É necessário justificar os itens em falta nas notas."}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                em_falta = "0"
+                
+            data['em_falta'] = em_falta
+            
+            # Use provided username or a default value
+            if not data.get('username') and request.data.get('current_user'):
+                data['username'] = request.data.get('current_user')
+                
             serializer = self.get_serializer(data=data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-        return super().create(request, *args, **kwargs)
+        except Exception as e:
+            logger.error(f"Error creating item: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class TransportItemListCreate(generics.ListCreateAPIView):
     queryset = TransportItem.objects.all()
@@ -77,23 +173,47 @@ class TransportItemListCreate(generics.ListCreateAPIView):
     parser_classes = (JSONParser, MultiPartParser, FormParser)
 
     def create(self, request, *args, **kwargs):
-        if 'imagem' in request.FILES:
-            image_file = request.FILES['imagem']
-            image_data = base64.b64encode(image_file.read()).decode('utf-8')
-            image_type = image_file.content_type
-            data = request.data.copy()
-            data['imagem'] = f"data:{image_type};base64,{image_data}"
+        try:
+            # Process image if present
+            if 'imagem' in request.FILES:
+                image_file = request.FILES['imagem']
+                image_data = base64.b64encode(image_file.read()).decode('utf-8')
+                image_type = image_file.content_type
+                data = request.data.copy()
+                data['imagem'] = f"data:{image_type};base64,{image_data}"
+            else:
+                data = request.data.copy()
+            
+            # Calculate em_falta automatically
+            quantidade = int(data.get('quantidade', 0))
+            quantidade_total = int(data.get('quantidade_total', 0))
+            
+            if quantidade_total < quantidade:
+                em_falta = str(quantidade - quantidade_total)
+                
+                # Validate that notes/justification is provided when items are missing
+                if not data.get('notas') or not data.get('notas').strip():
+                    return Response(
+                        {"notas": "É necessário justificar os itens em falta nas notas."}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                em_falta = "0"
+                
+            data['em_falta'] = em_falta
+            
+            # Use provided username or a default value from current_user
+            if not data.get('username') and request.data.get('current_user'):
+                data['username'] = request.data.get('current_user')
+            
             serializer = self.get_serializer(data=data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-        
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        except Exception as e:
+            logger.error(f"Error creating TransportItem: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class TransportItemRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = TransportItem.objects.all()
@@ -115,7 +235,29 @@ class TransportItemRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
                 data = request.data.copy()
                 data['imagem'] = f"data:{image_type};base64,{image_data}"
             else:
-                data = request.data
+                data = request.data.copy()
+            
+            # Calculate em_falta automatically
+            quantidade = int(data.get('quantidade', instance.quantidade))
+            quantidade_total = int(data.get('quantidade_total', instance.quantidade_total))
+            
+            if quantidade_total < quantidade:
+                em_falta = str(quantidade - quantidade_total)
+                
+                # Validate that notes/justification is provided when items are missing
+                if not data.get('notas') and (not instance.notas or instance.notas.strip() == ''):
+                    return Response(
+                        {"notas": "É necessário justificar os itens em falta nas notas."}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                em_falta = "0"
+                
+            data['em_falta'] = em_falta
+            
+            # Update username from current_user if available
+            if not data.get('username') and request.data.get('current_user'):
+                data['username'] = request.data.get('current_user')
             
             serializer = self.get_serializer(instance, data=data, partial=partial)
             serializer.is_valid(raise_exception=True)

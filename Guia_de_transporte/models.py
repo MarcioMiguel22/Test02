@@ -10,6 +10,7 @@ class GuiaDeTransporte(models.Model):
     descricao = models.TextField()
     unidade = models.CharField(max_length=50, default='UN')  # Campo adicionado
     quantidade = models.IntegerField()
+    quantidade_total = models.IntegerField(default=0)  # Nova quantidade total
     peso = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Campo adicionado
     volume = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Campo adicionado
     notas = models.TextField(blank=True, null=True)
@@ -17,6 +18,7 @@ class GuiaDeTransporte(models.Model):
     total = models.CharField(max_length=50, default='0')
     imagem = models.TextField(blank=True, null=True)  # Campo adicionado do TransportItem
     username = models.CharField(max_length=150, blank=True, null=True)  # Campo para registrar o usuário
+    current_user = models.CharField(max_length=255, blank=True, null=True)  # Campo para rastrear o usuário atual
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -33,10 +35,12 @@ class TransportItem(models.Model):
     descricao = models.TextField(blank=True, null=True)
     unidade = models.CharField(max_length=50, default='UN')
     quantidade = models.IntegerField(default=0)
+    quantidade_total = models.IntegerField(default=0)  # Nova quantidade total
     em_falta = models.CharField(max_length=50, default='0')
     total = models.CharField(max_length=50, default='0')
     notas = models.TextField(blank=True, null=True)
     imagem = models.TextField(blank=True, null=True)  # Base64 encoded image
+    current_user = models.CharField(max_length=255, blank=True, null=True)  # Campo para rastrear o usuário atual
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

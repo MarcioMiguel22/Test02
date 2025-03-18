@@ -80,6 +80,25 @@ python manage.py runserver
 - `PUT /transport-items/{id}/` ou `/guiaderemeca/{id}/` - Atualiza um item existente
 - `DELETE /transport-items/{id}/` ou `/guiaderemeca/{id}/` - Remove um item existente
 
+## Sistema de Verificação de Quantidades
+
+O sistema possui um mecanismo avançado para verificação e controle de quantidades:
+
+### Campos de Quantidade
+- `quantidade`: Quantidade conforme a guia de transporte
+- `quantidade_total`: Quantidade real encontrada na carrinha/veículo
+
+### Cálculo Automático de Faltas
+- O campo `em_falta` é calculado automaticamente como a diferença entre `quantidade` e `quantidade_total` quando a quantidade real é menor que a da guia.
+- Quando há itens em falta (quantidade_total < quantidade), é obrigatório fornecer uma justificativa no campo `notas`.
+
+### Validação de Dados
+- O sistema bloqueia a criação/atualização de registros com itens em falta sem a devida justificativa.
+- Uma mensagem de erro específica é retornada quando faltar justificativa: "É necessário justificar os itens em falta nas notas."
+
+### Rastreabilidade
+- O campo `username` e `current_user` registram quem criou/atualizou cada item, permitindo auditoria completa do processo.
+
 ## Implementação Backend
 
 ### Detalhes de API e Exemplos
@@ -122,14 +141,16 @@ python manage.py runserver
 {
   "item": "Nome do Item",
   "descricao": "Descrição detalhada",
-  "em_falta": "0",
-  "quantidade": 5,
-  "notas": "Observações sobre o item",
+  "quantidade": 10,              // Quantidade conforme a guia
+  "quantidade_total": 8,         // Quantidade real encontrada
+  "notas": "Justificativa para os 2 itens em falta: danificados durante transporte",
+  "unidade": "UN",
   "total": "100"
 }
 ```
-- Campos obrigatórios: `item`, `descricao`, `quantidade`
-- Campos opcionais: `em_falta`, `notas`, `total`
+- Campos obrigatórios: `item`, `descricao`, `quantidade`, `quantidade_total`
+- Campo `em_falta` é calculado automaticamente
+- Se houver itens em falta (quantidade_total < quantidade), o campo `notas` torna-se obrigatório
 
 #### TransportItem API
 
@@ -229,10 +250,17 @@ const base64 = await toBase64(file);
 ### GuiaDeTransporte
 - `item`: Nome do item (CharField)
 - `descricao`: Descrição detalhada (TextField)
-- `em_falta`: Informação sobre falta (CharField, opcional)
+- `unidade`: Unidade de medida (CharField)
 - `quantidade`: Quantidade do item (IntegerField)
+- `quantidade_total`: Quantidade total do item (IntegerField)
+- `peso`: Peso do item (DecimalField, opcional)
+- `volume`: Volume do item (DecimalField, opcional)
+- `em_falta`: Informação sobre falta (CharField, opcional)
 - `notas`: Observações (TextField, opcional)
 - `total`: Valor total (CharField)
+- `imagem`: Imagem em Base64 (TextField, opcional)
+- `username`: Nome do usuário que registrou (CharField, opcional)
+- `current_user`: Nome do usuário atual manipulando o registro (CharField, opcional)
 - `created_at`: Data de criação (DateTimeField)
 - `updated_at`: Data de atualização (DateTimeField)
 
@@ -241,12 +269,31 @@ const base64 = await toBase64(file);
 - `descricao`: Descrição detalhada (TextField, opcional)
 - `unidade`: Unidade de medida (CharField)
 - `quantidade`: Quantidade do item (IntegerField)
+- `quantidade_total`: Quantidade total do item (IntegerField)
 - `em_falta`: Informação sobre falta (CharField)
 - `total`: Valor total (CharField)
 - `notas`: Observações (TextField, opcional)
 - `imagem`: Imagem em Base64 (TextField, opcional)
+- `current_user`: Nome do usuário atual manipulando o registro (CharField, opcional)
 - `created_at`: Data de criação (DateTimeField)
 - `updated_at`: Data de atualização (DateTimeField)
+
+## Casos de Uso
+
+### Verificação de Quantidades
+1. **Itens sem falta**: Quando `quantidade` = `quantidade_total`, o campo `em_falta` é definido como "0"
+2. **Itens com falta**: Quando `quantidade` > `quantidade_total`:
+   - O campo `em_falta` recebe o valor da diferença
+   - Uma justificativa no campo `notas` é obrigatória
+   - O sistema registra o usuário que realizou a operação
+
+### Exemplo de Fluxo de Verificação
+1. Recebimento de mercadorias:
+   - Registre no campo `quantidade` o valor conforme documentação de transporte
+   - Registre no campo `quantidade_total` a quantidade efetivamente recebida
+2. O sistema calcula automaticamente se há faltas
+3. Em caso de faltas, forneça uma justificativa no campo `notas`
+4. Os dados ficam disponíveis para auditoria posterior com informações sobre quem realizou a verificação
 
 ## Interface Administrativa
 A aplicação inclui uma interface administrativa personalizada acessível em `/admin/` após iniciar o servidor. Use as credenciais do superusuário criado anteriormente para acessar.

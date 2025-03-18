@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 class GuiaDeTransporteSerializer(serializers.ModelSerializer):
     class Meta:
         model = GuiaDeTransporte
-        fields = ['id', 'item', 'descricao', 'unidade', 'quantidade', 'peso', 'volume', 
-                 'notas', 'em_falta', 'total', 'imagem', 'username', 'created_at', 'updated_at']
+        fields = ['id', 'item', 'descricao', 'unidade', 'quantidade', 'quantidade_total', 'peso', 'volume', 
+                 'notas', 'em_falta', 'total', 'imagem', 'username', 'current_user', 'created_at', 'updated_at']
     
     def validate(self, data):
         # Log the validation process for debugging

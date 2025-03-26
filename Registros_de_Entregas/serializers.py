@@ -1,18 +1,25 @@
 from rest_framework import serializers
 from .models import RegistroEntrega
+from django.contrib.auth.models import User
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name']
 
 class RegistroEntregaSerializer(serializers.ModelSerializer):
     # Explicitly define imagens as a field since it's a property in the model
     imagens = serializers.ListField(child=serializers.CharField(), required=False, allow_empty=True, allow_null=True)
+    criado_por = UserSerializer(read_only=True)
     
     class Meta:
         model = RegistroEntrega
         fields = [
             'id', 'obra_id', 'data_entrega', 'numero_instalacao',
             'numero_obra', 'assinatura', 'imagem', 'imagens', 'notas', 'data_criacao',
-            'criado_em', 'atualizado_em'
+            'criado_em', 'atualizado_em', 'criado_por'
         ]
-        read_only_fields = ['id', 'data_criacao', 'criado_em', 'atualizado_em']
+        read_only_fields = ['id', 'data_criacao', 'criado_em', 'atualizado_em', 'criado_por']
 
     def to_representation(self, instance):
         """Converte para o formato esperado pelo frontend"""
@@ -21,6 +28,9 @@ class RegistroEntregaSerializer(serializers.ModelSerializer):
         # Get images from the model's field using the helper method
         if hasattr(instance, 'get_imagens'):
             representation['imagens'] = instance.get_imagens()
+        
+        # Get creator information
+        criado_por = representation.get('criado_por')
         
         return {
             'id': str(representation['id']),
@@ -33,6 +43,7 @@ class RegistroEntregaSerializer(serializers.ModelSerializer):
             'imagens': representation['imagens'],
             'notas': representation['notas'],
             'dataCriacao': representation['data_criacao'],
+            'criadoPor': criado_por,
         }
 
     def to_internal_value(self, data):

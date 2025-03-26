@@ -11,6 +11,10 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.files.storage import default_storage
 import base64
 import uuid
+from django.http import JsonResponse
+import json
+import logging
+import traceback
 
 class RegistroEntregaViewSet(viewsets.ModelViewSet):
     """
@@ -44,12 +48,52 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class RegistroDiagnosticView(APIView):
+    """
+    Diagnostic view for troubleshooting registro data issues
+    """
+    def get(self, request, pk=None):
+        try:
+            registro = RegistroEntrega.objects.get(pk=pk)
+            
+            # Get raw data from the database
+            raw_data = {
+                'id': str(registro.id),
+                'imagens_raw': registro.imagens,  # Raw JSON string from DB
+                'imagens_parsed': registro.get_imagens(),  # Parsed list
+                'imagem': registro.imagem,
+                'model_fields': {field.name: field.get_internal_type() for field in RegistroEntrega._meta.fields}
+            }
+            
+            # Return detailed diagnostic info
+            return Response({
+                'success': True,
+                'diagnostic_info': raw_data,
+                'serialized_data': RegistroEntregaSerializer(registro).data
+            }, status=status.HTTP_200_OK)
+            
+        except RegistroEntrega.DoesNotExist:
+            return Response(
+                {"error": f"Registro with ID {pk} not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            # Return detailed error info
+            return Response({
+                'success': False,
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class RegistroUploadImagesView(APIView):
     parser_classes = (MultiPartParser, FormParser)
     
     def post(self, request, pk=None):
         try:
             registro = RegistroEntrega.objects.get(pk=pk)
+            
+            # Get the initial state
+            initial_images = registro.get_imagens()
             
             # Collect all image files from the request
             image_files = []
@@ -85,19 +129,26 @@ class RegistroUploadImagesView(APIView):
                 default_storage.delete(file_path)
             
             # Update the registro with the new images
-            if not registro.get_imagens():
-                registro.set_imagens(saved_images)
-            else:
-                # Append to existing images
-                current_images = registro.get_imagens()
-                current_images.extend(saved_images)
-                registro.set_imagens(current_images)
+            current_images = registro.get_imagens() or []
+            current_images.extend(saved_images)
             
+            registro.set_imagens(current_images)
             registro.save()
+            
+            # Verify images were saved correctly
+            final_images = registro.get_imagens()
             
             # Return the updated registro
             serializer = RegistroEntregaSerializer(registro)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'debug_info': {
+                    'initial_image_count': len(initial_images) if initial_images else 0,
+                    'added_image_count': len(saved_images),
+                    'final_image_count': len(final_images) if final_images else 0
+                }
+            }, status=status.HTTP_200_OK)
             
         except RegistroEntrega.DoesNotExist:
             return Response(
@@ -105,7 +156,9 @@ class RegistroUploadImagesView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            # Return detailed error info for debugging
+            return Response({
+                'success': False,
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

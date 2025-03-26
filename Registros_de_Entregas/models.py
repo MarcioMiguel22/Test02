@@ -1,8 +1,6 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
 import uuid
+from django.utils import timezone
 
 class RegistroEntrega(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -13,7 +11,7 @@ class RegistroEntrega(models.Model):
     assinatura = models.TextField(blank=True, null=True, verbose_name="Assinatura (Base64)")
     imagem = models.TextField(blank=True, null=True, verbose_name="Imagem (Base64)")
     notas = models.TextField(blank=True, null=True, verbose_name="Observações")
-    data_criacao = models.DateTimeField(auto_now_add=True, verbose_name="Data de Criação")
+    data_criacao = models.DateTimeField(default=timezone.now, verbose_name="Data de Criação")
     criado_em = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
     atualizado_em = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
 

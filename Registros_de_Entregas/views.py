@@ -37,8 +37,11 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
     def perform_create(self, serializer):
-        # Set the creator to the current authenticated user
-        serializer.save(criado_por=self.request.user)
+        # Only set the creator if the user is authenticated
+        if self.request.user.is_authenticated:
+            serializer.save(criado_por=self.request.user)
+        else:
+            serializer.save()
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)

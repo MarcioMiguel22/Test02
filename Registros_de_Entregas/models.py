@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 from django.utils import timezone
 import json
+from django.contrib.auth.models import User
 
 class RegistroEntrega(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -16,6 +17,8 @@ class RegistroEntrega(models.Model):
     data_criacao = models.DateTimeField(default=timezone.now, verbose_name="Data de Criação")
     criado_em = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
     atualizado_em = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
+    criado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, 
+                                   related_name='registros_criados', verbose_name="Criado por")
 
     def get_imagens(self):
         """Get images as a list from JSON string"""

@@ -2,7 +2,11 @@
 
 ## Resumo das Alterações no Backend
 
-Foi adicionado um novo campo `criado_por` ao modelo `RegistroEntrega` que rastreia qual usuário criou cada registro. Esta informação é automaticamente preenchida pelo backend quando um novo registro é criado.
+Foi adicionado um novo campo `criado_por` ao modelo `RegistroEntrega` que rastreia qual usuário criou cada registro. Esta informação é automaticamente preenchida pelo backend quando um novo registro é criado por um usuário autenticado.
+
+## Comportamento com Usuários Anônimos
+
+Para registros criados por usuários não autenticados (anônimos), o campo `criado_por` será `null`. O sistema foi configurado para permitir a criação de registros mesmo sem um usuário autenticado, para não interromper funcionalidades existentes.
 
 ## Formato dos Dados na API
 
@@ -29,7 +33,7 @@ O campo é retornado pelo endpoint da API no seguinte formato:
 }
 ```
 
-Se o registro foi criado antes desta atualização ou se foi criado por um sistema automatizado, o campo `criadoPor` pode ser `null`.
+Se o registro foi criado antes desta atualização, por um sistema automatizado, ou por um usuário não autenticado, o campo `criadoPor` será `null`.
 
 ## Implementação no Frontend
 
@@ -41,7 +45,7 @@ Você pode exibir o nome completo do criador na visualização do registro:
 // Exemplo com React
 const DisplayCreator = ({ registro }) => {
   if (!registro.criadoPor) {
-    return <span>Não especificado</span>;
+    return <span>Não autenticado</span>;
   }
   
   const { first_name, last_name, username } = registro.criadoPor;
@@ -63,6 +67,7 @@ const CreatorFilter = ({ creators, onFilterChange }) => {
   return (
     <select onChange={e => onFilterChange(e.target.value)}>
       <option value="">Todos os criadores</option>
+      <option value="anonymous">Não autenticado</option>
       {creators.map(creator => (
         <option key={creator.id} value={creator.id}>
           {creator.first_name} {creator.last_name} ({creator.username})
@@ -77,12 +82,17 @@ const CreatorFilter = ({ creators, onFilterChange }) => {
 
 Não é necessário adicionar o campo `criadoPor` nos formulários de criação ou edição, pois este campo é preenchido automaticamente pelo backend e é somente leitura.
 
+### 4. Autenticação para Melhor Rastreamento
+
+Para aproveitar ao máximo este recurso, é recomendável garantir que os usuários estejam autenticados antes de criar registros. Caso contrário, não será possível rastrear quem criou o registro.
+
 ## Observações Importantes
 
 1. O campo é definido automaticamente para o usuário logado quando um registro é criado.
-2. O campo não pode ser modificado pelo frontend - é somente leitura.
-3. Para visualizar este campo, o usuário precisa estar autenticado no sistema.
-4. Considere adicionar este campo nas tabelas e visualizações detalhadas de cada registro.
+2. Para registros criados por usuários não autenticados, o campo permanecerá como `null`.
+3. O campo não pode ser modificado pelo frontend - é somente leitura.
+4. Para rastrear corretamente, certifique-se de que os usuários estejam autenticados.
+5. Considere adicionar este campo nas tabelas e visualizações detalhadas de cada registro.
 
 ## Migração do Banco de Dados
 
@@ -112,7 +122,7 @@ const RegistrosTable = ({ registros }) => {
             <td>
               {registro.criadoPor 
                 ? `${registro.criadoPor.first_name} ${registro.criadoPor.last_name}` 
-                : "Não especificado"}
+                : "Não autenticado"}
             </td>
           </tr>
         ))}
@@ -121,3 +131,7 @@ const RegistrosTable = ({ registros }) => {
   );
 };
 ```
+
+## Tratamento de Erros Corrigido
+
+O sistema agora verifica corretamente se o usuário está autenticado antes de atribuir o `criado_por`, evitando erros ao criar registros com usuários anônimos.

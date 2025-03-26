@@ -6,9 +6,10 @@ class RegistroEntregaSerializer(serializers.ModelSerializer):
         model = RegistroEntrega
         fields = [
             'id', 'obra_id', 'data_entrega', 'numero_instalacao',
-            'numero_obra', 'assinatura', 'imagem', 'criado_em', 'atualizado_em'
+            'numero_obra', 'assinatura', 'imagem', 'notas', 'data_criacao',
+            'criado_em', 'atualizado_em'
         ]
-        read_only_fields = ['id', 'criado_em', 'atualizado_em']
+        read_only_fields = ['id', 'data_criacao', 'criado_em', 'atualizado_em']
 
     def to_representation(self, instance):
         """Converte para o formato esperado pelo frontend"""
@@ -21,6 +22,8 @@ class RegistroEntregaSerializer(serializers.ModelSerializer):
             'numeroObra': representation['numero_obra'],
             'assinatura': representation['assinatura'],
             'imagem': representation['imagem'],
+            'notas': representation['notas'],
+            'dataCriacao': representation['data_criacao'],
         }
 
     def to_internal_value(self, data):
@@ -34,5 +37,6 @@ class RegistroEntregaSerializer(serializers.ModelSerializer):
                 'numero_obra': data.get('numeroObra', ''),
                 'assinatura': data.get('assinatura', None),
                 'imagem': data.get('imagem', None),
+                'notas': data.get('notas', None),
             }
         return super().to_internal_value(data)

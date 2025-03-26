@@ -12,6 +12,8 @@ class RegistroEntrega(models.Model):
     numero_obra = models.CharField(max_length=100, verbose_name="Número da Obra")
     assinatura = models.TextField(blank=True, null=True, verbose_name="Assinatura (Base64)")
     imagem = models.TextField(blank=True, null=True, verbose_name="Imagem (Base64)")
+    notas = models.TextField(blank=True, null=True, verbose_name="Observações")
+    data_criacao = models.DateTimeField(auto_now_add=True, verbose_name="Data de Criação")
     criado_em = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
     atualizado_em = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
 

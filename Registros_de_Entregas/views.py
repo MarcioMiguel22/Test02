@@ -14,9 +14,9 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
     queryset = RegistroEntrega.objects.all()
     serializer_class = RegistroEntregaSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['numero_obra', 'numero_instalacao', 'data_entrega']
-    search_fields = ['numero_obra', 'numero_instalacao']
-    ordering_fields = ['data_entrega', 'criado_em']
+    filterset_fields = ['numero_obra', 'numero_instalacao', 'data_entrega', 'data_criacao']
+    search_fields = ['numero_obra', 'numero_instalacao', 'notas']
+    ordering_fields = ['data_entrega', 'data_criacao', 'criado_em']
     pagination_class = PageNumberPagination
 
     def create(self, request, *args, **kwargs):

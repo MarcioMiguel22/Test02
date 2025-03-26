@@ -85,13 +85,13 @@ class RegistroUploadImagesView(APIView):
                 default_storage.delete(file_path)
             
             # Update the registro with the new images
-            if not registro.imagens:
-                registro.imagens = saved_images
+            if not registro.get_imagens():
+                registro.set_imagens(saved_images)
             else:
                 # Append to existing images
-                current_images = registro.imagens
+                current_images = registro.get_imagens()
                 current_images.extend(saved_images)
-                registro.imagens = current_images
+                registro.set_imagens(current_images)
             
             registro.save()
             

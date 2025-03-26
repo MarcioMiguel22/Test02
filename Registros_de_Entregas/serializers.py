@@ -2,6 +2,9 @@ from rest_framework import serializers
 from .models import RegistroEntrega
 
 class RegistroEntregaSerializer(serializers.ModelSerializer):
+    # Explicitly define imagens as a field since it's a property in the model
+    imagens = serializers.ListField(child=serializers.CharField(), required=False)
+    
     class Meta:
         model = RegistroEntrega
         fields = [
@@ -14,6 +17,11 @@ class RegistroEntregaSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         """Converte para o formato esperado pelo frontend"""
         representation = super().to_representation(instance)
+        
+        # Use get_imagens method if available
+        if hasattr(instance, 'get_imagens') and callable(getattr(instance, 'get_imagens')):
+            representation['imagens'] = instance.get_imagens()
+        
         return {
             'id': str(representation['id']),
             'obraId': representation['obra_id'],

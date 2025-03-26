@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from django.utils import timezone
+import json
 
 class RegistroEntrega(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -10,10 +11,21 @@ class RegistroEntrega(models.Model):
     numero_obra = models.CharField(max_length=100, verbose_name="Número da Obra")
     assinatura = models.TextField(blank=True, null=True, verbose_name="Assinatura (Base64)")
     imagem = models.TextField(blank=True, null=True, verbose_name="Imagem (Base64)")
+    _imagens = models.TextField(null=True, blank=True, db_column='imagens', verbose_name="Imagens Adicionais")
     notas = models.TextField(blank=True, null=True, verbose_name="Observações")
     data_criacao = models.DateTimeField(default=timezone.now, verbose_name="Data de Criação")
     criado_em = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
     atualizado_em = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
+
+    @property
+    def imagens(self):
+        if self._imagens:
+            return json.loads(self._imagens)
+        return []
+    
+    @imagens.setter
+    def imagens(self, value):
+        self._imagens = json.dumps(value) if value else None
 
     class Meta:
         verbose_name = "Registro de Entrega"

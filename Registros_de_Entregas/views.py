@@ -15,6 +15,12 @@ from django.http import JsonResponse
 import json
 import logging
 import traceback
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
+from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 class RegistroEntregaViewSet(viewsets.ModelViewSet):
     """
@@ -28,13 +34,76 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
     ordering_fields = ['data_entrega', 'data_criacao', 'criado_em']
     pagination_class = PageNumberPagination
 
+    def list(self, request, *args, **kwargs):
+        """
+        Lista registros de entrega com otimização para carregamento mais rápido
+        quando o número de registros for grande.
+        """
+        try:
+            # Apply filters, search, and ordering
+            queryset = self.filter_queryset(self.get_queryset())
+            
+            # Apply additional advanced filtering if needed
+            queryset = self._apply_advanced_filters(request, queryset)
+            
+            # Optimize query by limiting loaded data per page
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error in list method: {str(e)}")
+            return Response(
+                {"error": "Erro ao listar registros", "detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def _apply_advanced_filters(self, request, queryset):
+        """
+        Aplica filtros avançados baseados nos parâmetros de query.
+        Suporta filtragem por período de data e outros filtros complexos.
+        """
+        # Get query parameters
+        params = request.query_params
+        
+        # Filter by date range if provided
+        data_inicio = params.get('data_inicio')
+        data_fim = params.get('data_fim')
+        
+        if data_inicio and data_fim:
+            try:
+                # Convert to datetime objects
+                data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d')
+                data_fim = datetime.strptime(data_fim, '%Y-%m-%d')
+                queryset = queryset.filter(data_entrega__range=(data_inicio, data_fim))
+            except ValueError:
+                # In case of invalid date format, just log and continue
+                logger.warning(f"Invalid date format: {data_inicio} - {data_fim}")
+        
+        # Filter by criado_por if requested
+        criado_por = params.get('criado_por')
+        if criado_por:
+            queryset = queryset.filter(criado_por__id=criado_por)
+            
+        return queryset
+
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        # Save with the authenticated user as creator
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            # Save with the authenticated user as creator
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        except Exception as e:
+            logger.error(f"Error creating registro: {str(e)}")
+            return Response(
+                {"error": "Erro ao criar registro", "detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
     
     def perform_create(self, serializer):
         # Only set the creator if the user is authenticated
@@ -44,17 +113,102 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
             serializer.save()
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
+        try:
+            partial = kwargs.pop('partial', False)
+            instance = self.get_object()
+            
+            # Check if user has permission to update
+            if not self._has_update_permission(request.user, instance):
+                return Response(
+                    {"error": "Você não tem permissão para editar este registro"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+                
+            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            
+            if getattr(instance, '_prefetched_objects_cache', None):
+                # If 'prefetch_related' has been applied to a queryset, we need to
+                # forcibly invalidate the prefetch cache on the instance.
+                instance._prefetched_objects_cache = {}
+                
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error updating registro: {str(e)}")
+            return Response(
+                {"error": "Erro ao atualizar registro", "detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Método explícito para lidar com atualizações parciais (PATCH).
+        Reutiliza a lógica do método update com partial=True.
+        """
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            instance = self.get_object()
+            
+            # Check if user has permission to delete
+            if not self._has_update_permission(request.user, instance):
+                return Response(
+                    {"error": "Você não tem permissão para remover este registro"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+                
+            self.perform_destroy(instance)
+            return Response(
+                {"success": "Registro removido com sucesso"},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except Exception as e:
+            logger.error(f"Error deleting registro: {str(e)}")
+            return Response(
+                {"error": "Erro ao remover registro", "detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def _has_update_permission(self, user, instance):
+        """
+        Verifica se o usuário tem permissão para atualizar ou excluir um registro.
+        Só o criador do registro ou um admin pode modificá-lo.
+        """
+        # Allow if user is admin
+        if user.is_staff or user.is_superuser:
+            return True
+            
+        # Allow if user is the creator
+        if instance.criado_por and instance.criado_por == user:
+            return True
+            
+        # Deny otherwise
+        return False
+
+    @action(detail=True, methods=['get'])
+    def images(self, request, pk=None):
+        """
+        Endpoint para retornar apenas as imagens de um registro
+        para carregamento mais rápido em interfaces específicas.
+        """
+        try:
+            registro = self.get_object()
+            
+            # Return only images data
+            return Response({
+                'id': str(registro.id),
+                'imagem': registro.imagem,
+                'imagens': registro.get_imagens()
+            })
+        except Exception as e:
+            logger.error(f"Error fetching images: {str(e)}")
+            return Response(
+                {"error": "Erro ao buscar imagens", "detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 class RegistroDiagnosticView(APIView):
     """

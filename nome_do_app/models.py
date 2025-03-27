@@ -57,6 +57,13 @@ class CodigoEntrada(models.Model):
         help_text="Tipo do contrato"
     )
 
+    localizacao_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="ID de agrupamento da localização"
+    )
+
     def __str__(self) -> str:
         return f"{self.localizacao} - {self.instalacao}"
 

@@ -21,8 +21,13 @@ class CodigoEntradaViewSet(viewsets.ModelViewSet):
     ViewSet para o modelo CodigoEntrada. Provê operações de CRUD completas:
     list, retrieve, create, update, partial_update e destroy.
     """
-    queryset = CodigoEntrada.objects.all()
     serializer_class = CodigoEntradaSerializer
+    
+    def get_queryset(self):
+        """
+        Retorna apenas registros que não foram marcados como excluídos.
+        """
+        return CodigoEntrada.objects.filter(is_deleted=False)
 
     def create(self, request, *args, **kwargs):
         """
@@ -67,6 +72,41 @@ class CodigoEntradaViewSet(viewsets.ModelViewSet):
         # Se for objeto único, segue comportamento normal do DRF
         return super().create(request, *args, **kwargs)
 
+    def update(self, request, *args, **kwargs):
+        """
+        Substitui a função update para lidar com o flag is_deleted.
+        Se o cliente enviar is_deleted=True, marcar como excluído logicamente em vez de atualizar.
+        """
+        is_deleted = request.data.get('is_deleted', False)
+        
+        # Se o cliente está tentando marcar como excluído
+        if is_deleted:
+            instance = self.get_object()
+            instance.is_deleted = True
+            instance.save()
+            return Response({"success": True, "message": "Registro marcado como excluído."}, 
+                          status=status.HTTP_200_OK)
+        
+        # Caso contrário, segue o fluxo normal de atualização
+        return super().update(request, *args, **kwargs)
+    
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Substitui a função partial_update para lidar com o flag is_deleted.
+        """
+        is_deleted = request.data.get('is_deleted', False)
+        
+        # Se o cliente está tentando marcar como excluído
+        if is_deleted:
+            instance = self.get_object()
+            instance.is_deleted = True
+            instance.save()
+            return Response({"success": True, "message": "Registro marcado como excluído."}, 
+                          status=status.HTTP_200_OK)
+        
+        # Caso contrário, segue o fluxo normal
+        return super().partial_update(request, *args, **kwargs)
+
     @action(detail=False, methods=['post'])
     def sync(self, request):
         """
@@ -74,7 +114,8 @@ class CodigoEntradaViewSet(viewsets.ModelViewSet):
         Neste exemplo, mantém o comportamento 'tudo ou nada'.
         Se quiser partial success aqui também, basta usar lógica semelhante a 'create'.
         """
-        CodigoEntrada.objects.all().delete()
+        # Atualizado para excluir logicamente em vez de apagar fisicamente
+        CodigoEntrada.objects.all().update(is_deleted=True)
 
         serializer = self.get_serializer(data=request.data, many=True)
         serializer.is_valid(raise_exception=True)
@@ -82,8 +123,13 @@ class CodigoEntradaViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class CodigoListCreateAPIView(generics.ListCreateAPIView):
-    queryset = CodigoEntrada.objects.all()
     serializer_class = CodigoEntradaSerializer
+    
+    def get_queryset(self):
+        """
+        Retorna apenas registros que não foram marcados como excluídos.
+        """
+        return CodigoEntrada.objects.filter(is_deleted=False)
 
     def get(self, request, *args, **kwargs):
         """
@@ -105,6 +151,15 @@ class CodigoListCreateAPIView(generics.ListCreateAPIView):
         Handle PUT requests to update a CodigoEntrada instance.
         """
         instance = self.get_object()
+        
+        # Check if this is a soft delete request
+        is_deleted = request.data.get('is_deleted', False)
+        if is_deleted:
+            instance.is_deleted = True
+            instance.save()
+            return Response({"success": True, "message": "Registro marcado como excluído."}, 
+                          status=status.HTTP_200_OK)
+        
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)

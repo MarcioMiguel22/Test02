@@ -56,6 +56,10 @@ class CodigoEntrada(models.Model):
         default='',
         help_text="Tipo do contrato"
     )
+    is_deleted = models.BooleanField(
+        default=False,
+        help_text="Flag para exclusão lógica"
+    )
 
     def __str__(self) -> str:
         return f"{self.localizacao} - {self.instalacao}"

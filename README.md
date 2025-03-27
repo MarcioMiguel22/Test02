@@ -12,7 +12,10 @@ The Férias (Vacation) backend is a robust Django REST Framework API for managin
 - **Authentication**: Token-based authentication
 - **Documentation**: Auto-generated API documentation with Swagger/OpenAPI
 
+
 ## Key Features
+
+
 
 - 📊 **Complete CRUD Operations**: Full API for vacation records management
 - 🔒 **Permission-Based Access**: Role-based access control for different operations

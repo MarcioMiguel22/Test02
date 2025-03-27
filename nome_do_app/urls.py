@@ -19,10 +19,4 @@ urlpatterns = [
 
     # Rota específica para CodigoListCreateAPIView
     path('api/codigos/custom/', CodigoListCreateAPIView.as_view(), name='codigo-list-create'),
-    
-    # Adicionar a rota para a página inicial
-    path('', views.home, name='home'),
-    
-    # Debug endpoint for DELETE
-    path('api/debug-delete/<int:pk>/', views.delete_debug, name='debug-delete'),
 ]

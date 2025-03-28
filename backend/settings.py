@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'Registros_de_Entregas',
     'authentication',
     'Férias',
+    'despesas_carro',
 
 ]
 

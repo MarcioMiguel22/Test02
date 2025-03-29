@@ -1,0 +1,97 @@
+# API Guide - Despesas Carro
+
+## Base URL
+```
+/api/despesas-carro/
+```
+
+## Authentication
+All endpoints require authentication. Make sure to include the authentication token in the header:
+```
+Authorization: Bearer <your_token>
+```
+
+## Endpoints
+
+### List all expenses
+```
+GET /api/despesas-carro/
+```
+Returns all expenses for the logged-in user.
+
+### Get single expense
+```
+GET /api/despesas-carro/{id}/
+```
+Returns a specific expense by ID.
+
+### Create new expense
+```
+POST /api/despesas-carro/
+```
+Body:
+```json
+{
+  "tipo_combustivel": "Gasolina",
+  "valor_despesa": 100.50,
+  "data_despesa": "2023-06-15",
+  "quilometragem": 45000,
+  "observacoes": "Abastecimento completo",
+  "imagem": "base64string",
+  "imagens": ["base64string1", "base64string2"]
+}
+```
+
+### Update expense
+```
+PUT /api/despesas-carro/{id}/
+```
+Body: Same as create
+
+### Partial update
+```
+PATCH /api/despesas-carro/{id}/
+```
+Body: Include only the fields you want to update
+
+### Delete expense
+```
+DELETE /api/despesas-carro/{id}/
+```
+
+### Search expenses
+```
+GET /api/despesas-carro/search/?search=termo&username=user
+```
+Parameters:
+- search: Search term for tipo_combustivel, valor_despesa, or observacoes
+- username: Filter by username (admin only)
+
+## Response Format Example
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "tipo_combustivel": "Gasolina",
+  "valor_despesa": "100.50",
+  "data_despesa": "2023-06-15",
+  "quilometragem": 45000,
+  "imagem": "base64string",
+  "imagens": ["base64string1", "base64string2"],
+  "observacoes": "Abastecimento completo",
+  "data_criacao": "2023-06-15T14:30:00Z",
+  "usuario_criacao": "username",
+  "criadoPor": {
+    "id": 1,
+    "username": "username",
+    "first_name": "Nome",
+    "last_name": "Sobrenome"
+  }
+}
+```
+
+## Error Responses
+- 400: Bad Request - Invalid data provided
+- 401: Unauthorized - Missing or invalid authentication
+- 403: Forbidden - Not allowed to access this resource
+- 404: Not Found - Resource not found
+- 500: Internal Server Error

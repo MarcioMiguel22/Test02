@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Avaria, Material
+from .models import Avaria, Material, RatesConfiguration
 
 class AvariaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,3 +17,8 @@ class MaterialSerializer(serializers.ModelSerializer):
     class Meta:
         model = Material
         fields = '__all__'
+
+class RatesConfigurationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RatesConfiguration
+        fields = ['id', 'standard_rate', 'stop_rate', 'after_11pm_surcharge', 'current_user']

@@ -1,10 +1,10 @@
 from django.shortcuts import render
-from rest_framework import generics
+from rest_framework import generics, viewsets, status
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
-from .models import Avaria, Material
-from .serializers import AvariaSerializer, MaterialSerializer
+from rest_framework.decorators import action
+from .models import Avaria, Material, RatesConfiguration
+from .serializers import AvariaSerializer, MaterialSerializer, RatesConfigurationSerializer
 
 class AvariaListCreate(generics.ListCreateAPIView):
     serializer_class = AvariaSerializer
@@ -62,3 +62,44 @@ class MaterialRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class RatesConfigurationViewSet(viewsets.ModelViewSet):
+    queryset = RatesConfiguration.objects.all()
+    serializer_class = RatesConfigurationSerializer
+    
+    def get_queryset(self):
+        queryset = RatesConfiguration.objects.all()
+        user = self.request.query_params.get('user', None)
+        if user is not None:
+            queryset = queryset.filter(current_user=user)
+        return queryset
+    
+    @action(detail=False, methods=['get'])
+    def current(self, request):
+        """Get current user's rates or create default if doesn't exist"""
+        user = request.query_params.get('user', None)
+        
+        try:
+            config = RatesConfiguration.objects.get(current_user=user)
+        except RatesConfiguration.DoesNotExist:
+            # Create default configuration
+            config = RatesConfiguration.objects.create(current_user=user)
+        
+        serializer = self.get_serializer(config)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['post'])
+    def update_rates(self, request):
+        """Update rates for current user"""
+        user = request.data.get('current_user', None)
+        
+        try:
+            config = RatesConfiguration.objects.get(current_user=user)
+        except RatesConfiguration.DoesNotExist:
+            config = RatesConfiguration.objects.create(current_user=user)
+        
+        serializer = self.get_serializer(config, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

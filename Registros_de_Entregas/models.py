@@ -8,6 +8,8 @@ class RegistroEntrega(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     obra_id = models.CharField(max_length=100, verbose_name="ID da Obra")
     data_entrega = models.DateField(verbose_name="Data de Entrega")
+    data_entrega_doc = models.DateField(null=True, blank=True, verbose_name="Data de Entrega à Chefia")
+    data_trabalho_finalizado = models.DateField(null=True, blank=True, verbose_name="Data de Finalização")
     numero_instalacao = models.CharField(max_length=100, verbose_name="Número de Instalação")
     numero_obra = models.CharField(max_length=100, verbose_name="Número da Obra")
     assinatura = models.TextField(blank=True, null=True, verbose_name="Assinatura (Base64)")

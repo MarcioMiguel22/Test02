@@ -15,9 +15,9 @@ class RegistroEntregaSerializer(serializers.ModelSerializer):
     class Meta:
         model = RegistroEntrega
         fields = [
-            'id', 'obra_id', 'data_entrega', 'numero_instalacao',
-            'numero_obra', 'assinatura', 'imagem', 'imagens', 'notas', 'data_criacao',
-            'criado_em', 'atualizado_em', 'criado_por'
+            'id', 'obra_id', 'data_entrega', 'data_entrega_doc', 'data_trabalho_finalizado',
+            'numero_instalacao', 'numero_obra', 'assinatura', 'imagem', 'imagens', 'notas', 
+            'data_criacao', 'criado_em', 'atualizado_em', 'criado_por'
         ]
         read_only_fields = ['id', 'data_criacao', 'criado_em', 'atualizado_em', 'criado_por']
 
@@ -36,6 +36,8 @@ class RegistroEntregaSerializer(serializers.ModelSerializer):
             'id': str(representation['id']),
             'obraId': representation['obra_id'],
             'dataEntrega': representation['data_entrega'],
+            'dataEntregaDoc': representation['data_entrega_doc'],
+            'dataTrabalhoFinalizado': representation['data_trabalho_finalizado'],
             'numeroInstalacao': representation['numero_instalacao'],
             'numeroObra': representation['numero_obra'],
             'assinatura': representation['assinatura'],
@@ -54,6 +56,8 @@ class RegistroEntregaSerializer(serializers.ModelSerializer):
         if 'obraId' in data:
             internal_data['obra_id'] = data.get('obraId', '')
             internal_data['data_entrega'] = data.get('dataEntrega', '')
+            internal_data['data_entrega_doc'] = data.get('dataEntregaDoc', None)
+            internal_data['data_trabalho_finalizado'] = data.get('dataTrabalhoFinalizado', None)
             internal_data['numero_instalacao'] = data.get('numeroInstalacao', '')
             internal_data['numero_obra'] = data.get('numeroObra', '')
             internal_data['assinatura'] = data.get('assinatura', None)

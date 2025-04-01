@@ -29,9 +29,16 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
     queryset = RegistroEntrega.objects.all()
     serializer_class = RegistroEntregaSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['numero_obra', 'numero_instalacao', 'data_entrega', 'data_criacao']
+    filterset_fields = [
+        'numero_obra', 'numero_instalacao', 
+        'data_entrega', 'data_entrega_doc', 'data_trabalho_finalizado',
+        'data_criacao'
+    ]
     search_fields = ['numero_obra', 'numero_instalacao', 'notas']
-    ordering_fields = ['data_entrega', 'data_criacao', 'criado_em']
+    ordering_fields = [
+        'data_entrega', 'data_entrega_doc', 'data_trabalho_finalizado',
+        'data_criacao', 'criado_em'
+    ]
     pagination_class = PageNumberPagination
 
     def list(self, request, *args, **kwargs):
@@ -69,19 +76,26 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
         # Get query parameters
         params = request.query_params
         
-        # Filter by date range if provided
-        data_inicio = params.get('data_inicio')
-        data_fim = params.get('data_fim')
-        
-        if data_inicio and data_fim:
-            try:
-                # Convert to datetime objects
-                data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d')
-                data_fim = datetime.strptime(data_fim, '%Y-%m-%d')
-                queryset = queryset.filter(data_entrega__range=(data_inicio, data_fim))
-            except ValueError:
-                # In case of invalid date format, just log and continue
-                logger.warning(f"Invalid date format: {data_inicio} - {data_fim}")
+        # Filter by date ranges if provided
+        for date_field in ['data_entrega', 'data_entrega_doc', 'data_trabalho_finalizado']:
+            inicio_param = f'{date_field}_inicio'
+            fim_param = f'{date_field}_fim'
+            
+            inicio = params.get(inicio_param)
+            fim = params.get(fim_param)
+            
+            if inicio and fim:
+                try:
+                    # Convert to datetime objects
+                    inicio_dt = datetime.strptime(inicio, '%Y-%m-%d')
+                    fim_dt = datetime.strptime(fim, '%Y-%m-%d')
+                    
+                    # Create filter parameter dynamically
+                    date_range_filter = {f'{date_field}__range': (inicio_dt, fim_dt)}
+                    queryset = queryset.filter(**date_range_filter)
+                except ValueError:
+                    # In case of invalid date format, just log and continue
+                    logger.warning(f"Invalid date format for {date_field}: {inicio} - {fim}")
         
         # Filter by criado_por if requested
         criado_por = params.get('criado_por')
@@ -224,6 +238,9 @@ class RegistroDiagnosticView(APIView):
                 'imagens_raw': registro.imagens,  # Raw JSON string from DB
                 'imagens_parsed': registro.get_imagens(),  # Parsed list
                 'imagem': registro.imagem,
+                'data_entrega': registro.data_entrega,
+                'data_entrega_doc': registro.data_entrega_doc,
+                'data_trabalho_finalizado': registro.data_trabalho_finalizado,
                 'model_fields': {field.name: field.get_internal_type() for field in RegistroEntrega._meta.fields}
             }
             

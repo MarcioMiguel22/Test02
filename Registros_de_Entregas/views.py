@@ -392,39 +392,38 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
                 # Clean up the file since we're storing it as base64
                 default_storage.delete(file_path)
             
-            # Update the registro with the new images
-            current_images = registro.get_imagens() or []
-            current_images.extend(saved_images)
-            
+            # Atualiza o registro com as novas imagens
             registro.set_imagens(current_images)
             registro.save()
             
-            # Verify images were saved correctly
+            # Verifica se as imagens foram salvas corretamente
             final_images = registro.get_imagens()
             
-            # Return the updated registro
+            # Retorna o registro atualizado
             serializer = RegistroEntregaSerializer(registro)
             return Response({
                 'success': True,
                 'data': serializer.data,
                 'debug_info': {
-                    'initial_image_count': len(initial_images) if initial_images else 0,
-                    'added_image_count': len(saved_images),
-                    'final_image_count': len(final_images) if final_images else 0
+                    # Informações de depuração para verificar o processo de adição de imagens
+                    'initial_image_count': len(initial_images) if initial_images else 0,  # Quantidade inicial de imagens
+                    'added_image_count': len(saved_images),  # Quantidade de imagens adicionadas
+                    'final_image_count': len(final_images) if final_images else 0  # Quantidade final de imagens
                 }
             }, status=status.HTTP_200_OK)
             
         except RegistroEntrega.DoesNotExist:
+            # Retorna erro se o registro não for encontrado
             return Response(
-                {"error": f"Registro with ID {pk} not found."},
+                {"error": f"Registro com ID {pk} não encontrado."},
                 status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
-            # Return detailed error info for debugging
+            # Retorna informações detalhadas de erro para depuração
             return Response({
                 'success': False,
                 'error': str(e),
-                'traceback': traceback.format_exc()
+                'traceback': traceback.format_exc()  # Rastreamento completo do erro
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

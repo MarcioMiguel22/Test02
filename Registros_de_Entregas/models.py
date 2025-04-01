@@ -5,6 +5,17 @@ import json
 from django.contrib.auth.models import User
 
 class RegistroEntrega(models.Model):
+    # Document type choices
+    TIPO_DOCUMENTO_CHOICES = [
+        ('trabalho_directo_faturar', '1. Trabalho Directo a Facturar'),
+        ('trabalho_directo_contrato', '2. Trabalho Directo (Contracto Completo)'),
+        ('obra', '3. Obra'),
+        ('requisicao_material', '4. Requisição de Material'),
+        ('retirada_lixo', '5. Pedido de Retirada de Lixo das Instalações'),
+        ('marcacao_ferias', '6. Marcação de Férias'),
+        ('outros', '7. Outros'),
+    ]
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     obra_id = models.CharField(max_length=100, verbose_name="ID da Obra")
     data_entrega = models.DateField(verbose_name="Data de Entrega")
@@ -21,6 +32,14 @@ class RegistroEntrega(models.Model):
     atualizado_em = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
     criado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, 
                                    related_name='registros_criados', verbose_name="Criado por")
+    tipo_documento = models.CharField(
+        max_length=50, 
+        choices=TIPO_DOCUMENTO_CHOICES,
+        default='trabalho_directo_faturar',
+        verbose_name="Tipo de Documento",
+        null=True, 
+        blank=True
+    )
 
     def get_imagens(self):
         """Get images as a list from JSON string"""

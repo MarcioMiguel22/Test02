@@ -32,12 +32,12 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
     filterset_fields = [
         'numero_obra', 'numero_instalacao', 
         'data_entrega', 'data_entrega_doc', 'data_trabalho_finalizado',
-        'data_criacao'
+        'data_criacao', 'tipo_documento'
     ]
     search_fields = ['numero_obra', 'numero_instalacao', 'notas']
     ordering_fields = [
         'data_entrega', 'data_entrega_doc', 'data_trabalho_finalizado',
-        'data_criacao', 'criado_em'
+        'data_criacao', 'criado_em', 'tipo_documento'
     ]
     pagination_class = PageNumberPagination
 
@@ -96,6 +96,11 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
                 except ValueError:
                     # In case of invalid date format, just log and continue
                     logger.warning(f"Invalid date format for {date_field}: {inicio} - {fim}")
+        
+        # Filter by tipo_documento if provided
+        tipo_documento = params.get('tipo_documento')
+        if tipo_documento:
+            queryset = queryset.filter(tipo_documento=tipo_documento)
         
         # Filter by criado_por if requested
         criado_por = params.get('criado_por')
@@ -223,6 +228,29 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
                 {"error": "Erro ao buscar imagens", "detail": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+    
+    @action(detail=False, methods=['get'])
+    def document_types(self, request):
+        """
+        Endpoint para retornar os tipos de documento disponíveis
+        """
+        try:
+            # Get the choices from the model
+            choices = dict(RegistroEntrega.TIPO_DOCUMENTO_CHOICES)
+            
+            # Return formatted choices
+            return Response({
+                'success': True,
+                'document_types': [
+                    {'value': key, 'label': label} for key, label in choices.items()
+                ]
+            })
+        except Exception as e:
+            logger.error(f"Error fetching document types: {str(e)}")
+            return Response(
+                {"error": "Erro ao buscar tipos de documento", "detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 class RegistroDiagnosticView(APIView):
     """
@@ -241,6 +269,8 @@ class RegistroDiagnosticView(APIView):
                 'data_entrega': registro.data_entrega,
                 'data_entrega_doc': registro.data_entrega_doc,
                 'data_trabalho_finalizado': registro.data_trabalho_finalizado,
+                'tipo_documento': registro.tipo_documento,
+                'tipo_documento_display': dict(RegistroEntrega.TIPO_DOCUMENTO_CHOICES).get(registro.tipo_documento, 'Desconhecido'),
                 'model_fields': {field.name: field.get_internal_type() for field in RegistroEntrega._meta.fields}
             }
             

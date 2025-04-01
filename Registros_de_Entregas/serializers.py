@@ -17,7 +17,7 @@ class RegistroEntregaSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'obra_id', 'data_entrega', 'data_entrega_doc', 'data_trabalho_finalizado',
             'numero_instalacao', 'numero_obra', 'assinatura', 'imagem', 'imagens', 'notas', 
-            'data_criacao', 'criado_em', 'atualizado_em', 'criado_por'
+            'data_criacao', 'criado_em', 'atualizado_em', 'criado_por', 'tipo_documento'
         ]
         read_only_fields = ['id', 'data_criacao', 'criado_em', 'atualizado_em', 'criado_por']
 
@@ -46,6 +46,7 @@ class RegistroEntregaSerializer(serializers.ModelSerializer):
             'notas': representation['notas'],
             'dataCriacao': representation['data_criacao'],
             'criadoPor': criado_por,
+            'tipoDocumento': representation['tipo_documento'],
         }
 
     def to_internal_value(self, data):
@@ -63,6 +64,7 @@ class RegistroEntregaSerializer(serializers.ModelSerializer):
             internal_data['assinatura'] = data.get('assinatura', None)
             internal_data['imagem'] = data.get('imagem', None)
             internal_data['notas'] = data.get('notas', None)
+            internal_data['tipo_documento'] = data.get('tipoDocumento', 'trabalho_directo_faturar')
             
             # Handle images list separately to prevent losing it during conversion
             if 'imagens' in data:

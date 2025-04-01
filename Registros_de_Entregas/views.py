@@ -17,7 +17,7 @@ import logging
 import traceback
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Q
+from django.db.models import Q, Count
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -207,6 +207,60 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
         # Deny otherwise
         return False
 
+    @action(detail=False, methods=['get'])
+    def document_type_stats(self, request):
+        """
+        Return document type statistics grouped by tipo_documento
+        """
+        try:
+            # Get query parameters
+            username = request.query_params.get('username')
+            
+            # Base queryset - check for appropriate soft deletion field
+            # IMPORTANT: Use the appropriate field based on your model
+            try:
+                # Try with deleted field first (most common)
+                queryset = RegistroEntrega.objects.filter(deleted=False)
+            except:
+                try:
+                    # Try with deleted_at timestamp if deleted field doesn't exist
+                    queryset = RegistroEntrega.objects.filter(deleted_at__isnull=True)
+                except:
+                    try:
+                        # Try with is_active field if others don't exist
+                        queryset = RegistroEntrega.objects.filter(is_active=True)
+                    except:
+                        # Fallback to all records if no soft deletion field exists
+                        queryset = RegistroEntrega.objects.all()
+                        logger.warning("No soft deletion field found in RegistroEntrega model. Statistics may include deleted records.")
+            
+            # Filter by username if provided
+            if username:
+                queryset = queryset.filter(
+                    Q(criado_por__username=username) | Q(usuario_criacao=username)
+                )
+            
+            # Handle None/null values separately
+            null_count = queryset.filter(tipo_documento__isnull=True).count()
+            
+            # Group by tipo_documento and count
+            stats = list(queryset.filter(tipo_documento__isnull=False)
+                        .values('tipo_documento')
+                        .annotate(count=Count('tipo_documento'))
+                        .order_by('tipo_documento'))
+            
+            # Add null count if there are any
+            if null_count > 0:
+                stats.append({'tipo_documento': 'null', 'count': null_count})
+            
+            return Response(stats)
+        except Exception as e:
+            logger.error(f"Error fetching document type stats: {str(e)}")
+            return Response(
+                {"error": "Erro ao buscar estatísticas de tipos de documento", "detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
     @action(detail=True, methods=['get'])
     def images(self, request, pk=None):
         """
@@ -252,6 +306,128 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+    @action(detail=True, methods=['get'])
+    def diagnostic(self, request, pk=None):
+        """
+        Diagnostic endpoint for a specific registro
+        """
+        try:
+            registro = self.get_object()
+            
+            # Get raw data from the database
+            raw_data = {
+                'id': str(registro.id),
+                'imagens_raw': registro.imagens,  # Raw JSON string from DB
+                'imagens_parsed': registro.get_imagens(),  # Parsed list
+                'imagem': registro.imagem,
+                'data_entrega': registro.data_entrega,
+                'data_entrega_doc': registro.data_entrega_doc,
+                'data_trabalho_finalizado': registro.data_trabalho_finalizado,
+                'tipo_documento': registro.tipo_documento,
+                'tipo_documento_display': dict(RegistroEntrega.TIPO_DOCUMENTO_CHOICES).get(registro.tipo_documento, 'Desconhecido'),
+                'model_fields': {field.name: field.get_internal_type() for field in RegistroEntrega._meta.fields}
+            }
+            
+            # Return detailed diagnostic info
+            return Response({
+                'success': True,
+                'diagnostic_info': raw_data,
+                'serialized_data': RegistroEntregaSerializer(registro).data
+            }, status=status.HTTP_200_OK)
+            
+        except RegistroEntrega.DoesNotExist:
+            return Response(
+                {"error": f"Registro with ID {pk} not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            # Return detailed error info
+            return Response({
+                'success': False,
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['post'], parser_classes=[MultiPartParser, FormParser])
+    def upload_images(self, request, pk=None):
+        """
+        Upload multiple images for a specific registro
+        """
+        try:
+            registro = self.get_object()
+            
+            # Get the initial state
+            initial_images = registro.get_imagens()
+            
+            # Collect all image files from the request
+            image_files = []
+            
+            # Look for fields named imagem_0, imagem_1, etc.
+            i = 0
+            while f'imagem_{i}' in request.FILES:
+                image_files.append(request.FILES[f'imagem_{i}'])
+                i += 1
+            
+            if not image_files:
+                return Response(
+                    {"error": "No image files found in the request"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Save each image file and convert to base64
+            saved_images = []
+            for img_file in image_files:
+                # Generate a unique name for the image
+                img_name = f"{registro.pk}_{uuid.uuid4()}_{img_file.name}"
+                
+                # Save the image file to storage
+                file_path = default_storage.save(f'registros/images/{img_name}', img_file)
+                
+                # Read file and convert to base64 for storage
+                with default_storage.open(file_path) as f:
+                    image_data = f.read()
+                    base64_image = base64.b64encode(image_data).decode('utf-8')
+                    saved_images.append(base64_image)
+                
+                # Clean up the file since we're storing it as base64
+                default_storage.delete(file_path)
+            
+            # Update the registro with the new images
+            current_images = registro.get_imagens() or []
+            current_images.extend(saved_images)
+            
+            registro.set_imagens(current_images)
+            registro.save()
+            
+            # Verify images were saved correctly
+            final_images = registro.get_imagens()
+            
+            # Return the updated registro
+            serializer = RegistroEntregaSerializer(registro)
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'debug_info': {
+                    'initial_image_count': len(initial_images) if initial_images else 0,
+                    'added_image_count': len(saved_images),
+                    'final_image_count': len(final_images) if final_images else 0
+                }
+            }, status=status.HTTP_200_OK)
+            
+        except RegistroEntrega.DoesNotExist:
+            return Response(
+                {"error": f"Registro with ID {pk} not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            # Return detailed error info for debugging
+            return Response({
+                'success': False,
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class RegistroDiagnosticView(APIView):
     """
     Diagnostic view for troubleshooting registro data issues
@@ -293,6 +469,7 @@ class RegistroDiagnosticView(APIView):
                 'error': str(e),
                 'traceback': traceback.format_exc()
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class RegistroUploadImagesView(APIView):
     parser_classes = (MultiPartParser, FormParser)

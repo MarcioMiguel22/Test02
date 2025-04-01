@@ -29,9 +29,16 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
     queryset = RegistroEntrega.objects.all()
     serializer_class = RegistroEntregaSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['numero_obra', 'numero_instalacao', 'data_entrega', 'data_criacao']
+    filterset_fields = [
+        'numero_obra', 'numero_instalacao', 
+        'data_entrega', 'data_entrega_doc', 'data_trabalho_finalizado',
+        'data_criacao', 'tipo_documento'
+    ]
     search_fields = ['numero_obra', 'numero_instalacao', 'notas']
-    ordering_fields = ['data_entrega', 'data_criacao', 'criado_em']
+    ordering_fields = [
+        'data_entrega', 'data_entrega_doc', 'data_trabalho_finalizado',
+        'data_criacao', 'criado_em', 'tipo_documento'
+    ]
     pagination_class = PageNumberPagination
 
     def list(self, request, *args, **kwargs):
@@ -69,19 +76,31 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
         # Get query parameters
         params = request.query_params
         
-        # Filter by date range if provided
-        data_inicio = params.get('data_inicio')
-        data_fim = params.get('data_fim')
+        # Filter by date ranges if provided
+        for date_field in ['data_entrega', 'data_entrega_doc', 'data_trabalho_finalizado']:
+            inicio_param = f'{date_field}_inicio'
+            fim_param = f'{date_field}_fim'
+            
+            inicio = params.get(inicio_param)
+            fim = params.get(fim_param)
+            
+            if inicio and fim:
+                try:
+                    # Convert to datetime objects
+                    inicio_dt = datetime.strptime(inicio, '%Y-%m-%d')
+                    fim_dt = datetime.strptime(fim, '%Y-%m-%d')
+                    
+                    # Create filter parameter dynamically
+                    date_range_filter = {f'{date_field}__range': (inicio_dt, fim_dt)}
+                    queryset = queryset.filter(**date_range_filter)
+                except ValueError:
+                    # In case of invalid date format, just log and continue
+                    logger.warning(f"Invalid date format for {date_field}: {inicio} - {fim}")
         
-        if data_inicio and data_fim:
-            try:
-                # Convert to datetime objects
-                data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d')
-                data_fim = datetime.strptime(data_fim, '%Y-%m-%d')
-                queryset = queryset.filter(data_entrega__range=(data_inicio, data_fim))
-            except ValueError:
-                # In case of invalid date format, just log and continue
-                logger.warning(f"Invalid date format: {data_inicio} - {data_fim}")
+        # Filter by tipo_documento if provided
+        tipo_documento = params.get('tipo_documento')
+        if tipo_documento:
+            queryset = queryset.filter(tipo_documento=tipo_documento)
         
         # Filter by criado_por if requested
         criado_por = params.get('criado_por')
@@ -209,6 +228,29 @@ class RegistroEntregaViewSet(viewsets.ModelViewSet):
                 {"error": "Erro ao buscar imagens", "detail": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+    
+    @action(detail=False, methods=['get'])
+    def document_types(self, request):
+        """
+        Endpoint para retornar os tipos de documento disponíveis
+        """
+        try:
+            # Get the choices from the model
+            choices = dict(RegistroEntrega.TIPO_DOCUMENTO_CHOICES)
+            
+            # Return formatted choices
+            return Response({
+                'success': True,
+                'document_types': [
+                    {'value': key, 'label': label} for key, label in choices.items()
+                ]
+            })
+        except Exception as e:
+            logger.error(f"Error fetching document types: {str(e)}")
+            return Response(
+                {"error": "Erro ao buscar tipos de documento", "detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 class RegistroDiagnosticView(APIView):
     """
@@ -224,6 +266,11 @@ class RegistroDiagnosticView(APIView):
                 'imagens_raw': registro.imagens,  # Raw JSON string from DB
                 'imagens_parsed': registro.get_imagens(),  # Parsed list
                 'imagem': registro.imagem,
+                'data_entrega': registro.data_entrega,
+                'data_entrega_doc': registro.data_entrega_doc,
+                'data_trabalho_finalizado': registro.data_trabalho_finalizado,
+                'tipo_documento': registro.tipo_documento,
+                'tipo_documento_display': dict(RegistroEntrega.TIPO_DOCUMENTO_CHOICES).get(registro.tipo_documento, 'Desconhecido'),
                 'model_fields': {field.name: field.get_internal_type() for field in RegistroEntrega._meta.fields}
             }
             
